@@ -1,0 +1,35 @@
+/* @composer-gate */
+@media (min-width: 721px) {
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant="inline"] [data-input-scroll],
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant="inline"][data-has-attachments="true"] [data-input-scroll] {
+    min-height: 88px;
+    padding: 16px 64px 16px 16px;
+    border-radius: 16px;
+  }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant="inline"] [data-composer-input] { min-height: 54px; font-size: 16px; line-height: 26px; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-toolbar] { height: auto; min-height: 48px; display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 8px 4px; margin-top: 4px; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-tools] { flex: 1 1 320px; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-trailing] { flex: 0 1 auto; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; margin-right: 0; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-standard] { flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
+  body[data-dsh-claude-style] [data-composer-card] [data-dsh-claude-composer-toolbar] button { min-height: 36px; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant="inline"] :is(button[data-dsh-claude-control="send"], button[data-dsh-claude-control="stop"]) { right: 12px; top: 18px; bottom: auto; width: 40px; height: 40px; border-radius: 10px; z-index: 20; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+    min-height: 30px;
+    padding: 0 4px;
+    margin: 0 auto;
+    max-width: var(--dsh-composer-card-max-width, 100%);
+    width: 100%;
+    box-sizing: border-box;
+    justify-self: center;
+    pointer-events: auto;
+  }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] > [data-dsh-claude-context-meter] { position: relative; inset: auto; margin-left: auto; }
+}

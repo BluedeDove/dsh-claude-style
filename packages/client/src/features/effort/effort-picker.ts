@@ -300,6 +300,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
       effortBtn = document.createElement('button')
       effortBtn.type = 'button'
       effortBtn.className = 'dsh-claude-effort-btn'
+      effortBtn.setAttribute('data-dsh-claude-effort-trigger', '')
       effortBtn.setAttribute('aria-haspopup', 'menu')
       effortBtn.innerHTML = '<span class="dsh-claude-effort-btn-label"></span>'
       // Same contract as the model trigger: hover under the "All" scope,

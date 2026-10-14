@@ -28,6 +28,9 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   const whale = createMascotWhale(ctx, ui)
 
   function sync() {
+    if (matchMedia('(max-width: 720px)').matches && ui.composer?.isActive() && !ui.composer.isHero()) {
+      crab.release(); whale.release(); return
+    }
     const prefs = readPrefs()
     const mascot = resolveMascot(prefs)
     const conversation = prefs.mascotScope === MASCOT_SCOPE_ALL

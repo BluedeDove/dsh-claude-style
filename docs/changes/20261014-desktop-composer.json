@@ -1,0 +1,1 @@
+{"at":"2026-10-14","group":"improvements","order":2,"external":false,"zh":"桌面输入区增加多行空间，设置栏随宽度换行，上下文统计独立显示；原生输入在运行任务且草稿为空时让出发送位置，保持停止按钮可操作。","en":"Desktop composers provide multiline space, a wrapping settings toolbar and a separate context statistics row. Native input yields the send position to the stop button while a task runs with an empty draft."}

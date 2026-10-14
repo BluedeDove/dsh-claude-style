@@ -1,4 +1,4 @@
-import { COMPOSER_CARD_SELECTOR, COMPOSER_TOOLS_SELECTOR, COMPOSER_TRAILING_SELECTOR, COMPOSER_DOCK_SELECTOR, COMPOSER_MODES_SELECTOR, HEADER_TITLE_ROW_SELECTOR, HEADER_TITLE_SELECTOR, HEADER_UTILITIES_SELECTOR, HEADER_CORNER_SELECTOR, HEADER_CLUSTER_SELECTOR, HEADER_ACTIONS_SELECTOR } from '@dsh-claude-style/contracts/dom'
+import { COMPOSER_CARD_SELECTOR, COMPOSER_TOOLS_SELECTOR, COMPOSER_TRAILING_SELECTOR, COMPOSER_STANDARD_SELECTOR, GOAL_BAR_SELECTOR, COMPOSER_DOCK_SELECTOR, COMPOSER_MODES_SELECTOR, HEADER_TITLE_ROW_SELECTOR, HEADER_TITLE_SELECTOR, HEADER_UTILITIES_SELECTOR, HEADER_CORNER_SELECTOR, HEADER_CLUSTER_SELECTOR, HEADER_ACTIONS_SELECTOR, VIEW_TABS_STRIP_SELECTOR } from '@dsh-claude-style/contracts/dom'
 import { createStamp, setAttributeIfChanged } from '../../shared/dom'
 import { observeSize } from '../../core/bus'
 import type { HostContext } from '../../core/host'
@@ -6,6 +6,7 @@ import type { FeatureUi } from '../../core/feature'
 import type manifest from './mobile.manifest'
 import { installNativeComposer } from './native-composer'
 import { installMobileShell } from './mobile-shell'
+import { installMobileFloat } from './mobile-float'
 
 const MOBILE = 'data-dsh-claude-mobile'
 const TOOLS_OPEN = 'data-dsh-claude-mobile-tools-open'
@@ -13,8 +14,9 @@ const HEADER_OPEN = 'data-dsh-claude-mobile-header-open'
 const SECONDARY = 'data-dsh-claude-mobile-secondary'
 
 export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
-  const stopNativeInput = installNativeComposer(ctx)
+  const nativeInput = installNativeComposer(ctx)
   const shell = installMobileShell(ctx)
+  const floating = installMobileFloat()
   const query = matchMedia('(max-width: 720px)')
   const cardStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-card')
   const rowStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-toolbar')
@@ -26,35 +28,35 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   const actionsStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-actions')
   const utilitiesStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-utilities')
   const cornerStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-corner')
-  const stamps = [cardStamp, rowStamp, dockStamp, headerStamp, headerRootStamp, clusterStamp, titleStamp, actionsStamp, utilitiesStamp, cornerStamp]
+  const standardStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-standard')
+  const goalStamp = createStamp<HTMLElement>('data-dsh-claude-mobile-goal')
+  const stamps = [cardStamp, rowStamp, dockStamp, headerStamp, headerRootStamp, clusterStamp, titleStamp, actionsStamp, utilitiesStamp, cornerStamp, standardStamp, goalStamp]
   let secondary = new Set<Element>()
   let toolsButton: HTMLButtonElement | null = null, headerButton: HTMLButtonElement | null = null
   let stopRowSize: (() => void) | null = null
   let viewportFrame = 0, baselineHeight = innerHeight, baselineWidth = innerWidth
 
-  function button(label: string, attribute: string, marker: string) {
+  function button(label: string, kind: 'tools' | 'header', marker: string) {
     const control = document.createElement('button')
     control.type = 'button'; control.className = 'dsh-claude-mobile-toggle'
     control.textContent = label; control.setAttribute('aria-label', label)
     control.setAttribute(marker, '')
     control.setAttribute('aria-expanded', 'false')
     control.addEventListener('click', () => {
-      const open = !document.body.hasAttribute(attribute)
-      if (open) document.body.setAttribute(attribute, '')
-      else document.body.removeAttribute(attribute)
-      control.setAttribute('aria-expanded', String(open))
+      floating.toggle(kind)
       ui.schedule?.()
     })
     return control
   }
 
   function release() {
+    floating.dismiss()
     toolsButton?.remove(); headerButton?.remove(); toolsButton = null; headerButton = null
     stopRowSize?.(); stopRowSize = null
     for (const stamp of stamps) stamp.release()
     for (const element of secondary) element.removeAttribute(SECONDARY)
     secondary.clear()
-    for (const attribute of [MOBILE, TOOLS_OPEN, HEADER_OPEN, 'data-dsh-claude-mobile-keyboard']) document.body.removeAttribute(attribute)
+    for (const attribute of [MOBILE, TOOLS_OPEN, HEADER_OPEN, 'data-dsh-claude-mobile-keyboard', 'data-dsh-claude-mobile-has-goal']) document.body.removeAttribute(attribute)
     for (const property of ['--dsh-mobile-viewport-height', '--dsh-mobile-toolbar-height']) document.body.style.removeProperty(property)
   }
 
@@ -75,6 +77,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   function scheduleViewport() {if (!viewportFrame) viewportFrame = requestAnimationFrame(viewport)}
 
   function sync() {
+    nativeInput.sync()
     shell.sync()
     if (!query.matches) {if (document.body.hasAttribute(MOBILE)) release(); return}
     setAttributeIfChanged(document.body, MOBILE, '')
@@ -82,8 +85,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     const trailing = card?.querySelector<HTMLElement>(COMPOSER_TRAILING_SELECTOR)
     const row = trailing?.parentElement ?? null
     if (cardStamp.current() !== card) {
-      document.body.removeAttribute(TOOLS_OPEN)
-      toolsButton?.setAttribute('aria-expanded', 'false')
+      floating.dismiss()
     }
     cardStamp.mark(card)
     dockStamp.mark(card?.parentElement?.querySelector<HTMLElement>(`:scope > ${COMPOSER_DOCK_SELECTOR}`) ?? null)
@@ -95,12 +97,23 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
       })
     }
     if (row && !toolsButton?.isConnected) {
-      toolsButton?.remove(); toolsButton = button('工具', TOOLS_OPEN, 'data-dsh-claude-mobile-tools-toggle'); row.append(toolsButton)
+      toolsButton?.remove(); toolsButton = button('工具', 'tools', 'data-dsh-claude-mobile-tools-toggle'); row.append(toolsButton)
     }
     const nextSecondary = new Set<Element>()
     const modes = card?.querySelector(COMPOSER_MODES_SELECTOR)
     if (modes) nextSecondary.add(modes)
-    const tools = card?.querySelector(COMPOSER_TOOLS_SELECTOR)
+    const tools = card?.querySelector<HTMLElement>(COMPOSER_TOOLS_SELECTOR)
+    const standard = trailing?.querySelector<HTMLElement>(COMPOSER_STANDARD_SELECTOR) ?? null
+    standardStamp.mark(standard)
+    const goal = document.querySelector<HTMLElement>(GOAL_BAR_SELECTOR)
+    goalStamp.mark(goal)
+    if (goal) setAttributeIfChanged(document.body, 'data-dsh-claude-mobile-has-goal', '')
+    else document.body.removeAttribute('data-dsh-claude-mobile-has-goal')
+    if (toolsButton) {
+      toolsButton.title = goal ? '工具（包含当前目标）' : '输入工具和统计'
+      const dock = dockStamp.current()
+      floating.register('tools', toolsButton, [tools, standard, dock, dock?.contains(goal) ? null : goal])
+    }
     for (const element of secondary) if (!nextSecondary.has(element)) element.removeAttribute(SECONDARY)
     for (const element of nextSecondary) setAttributeIfChanged(element, SECONDARY, '')
     secondary = nextSecondary
@@ -114,8 +127,9 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     utilitiesStamp.mark(header?.querySelector<HTMLElement>(HEADER_UTILITIES_SELECTOR) ?? null)
     cornerStamp.mark(header?.querySelector<HTMLElement>(HEADER_CORNER_SELECTOR) ?? null)
     if (header && !headerButton?.isConnected) {
-      headerButton?.remove(); headerButton = button('更多', HEADER_OPEN, 'data-dsh-claude-mobile-header-toggle'); header.append(headerButton)
+      headerButton?.remove(); headerButton = button('更多', 'header', 'data-dsh-claude-mobile-header-toggle'); header.append(headerButton)
     }
+    if (headerButton) floating.register('header', headerButton, [actionsStamp.current(), utilitiesStamp.current(), cornerStamp.current(), headerRootStamp.current()?.querySelector<HTMLElement>(VIEW_TABS_STRIP_SELECTOR)])
     scheduleViewport()
   }
   function onWidthChange() {sync(); ui.schedule?.()}
@@ -130,6 +144,6 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     window.removeEventListener('resize', scheduleViewport)
     window.visualViewport?.removeEventListener('resize', scheduleViewport)
     window.visualViewport?.removeEventListener('scroll', scheduleViewport)
-    cancelAnimationFrame(viewportFrame); release(); shell.stop(); stopNativeInput(); delete ui.mobile
+    cancelAnimationFrame(viewportFrame); release(); floating.stop(); shell.stop(); nativeInput.stop(); delete ui.mobile
   }
 }

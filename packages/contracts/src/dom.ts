@@ -73,6 +73,10 @@ export const COMPOSER_INPUT_SELECTOR = '[data-composer-input]'
 export const COMPOSER_CARD_SELECTOR = '[data-composer-card]'
 export const COMPOSER_TOOLS_SELECTOR = '[class*="_tools"]'
 export const COMPOSER_TRAILING_SELECTOR = '[class*="_trailing"]'
+/** Model and effort controls, separate from the primary send/stop button. */
+export const COMPOSER_STANDARD_SELECTOR = '[class*="_standardControls"]'
+/** The optional goal plugin's own dock, including paused-goal controls. */
+export const GOAL_BAR_SELECTOR = '[data-goal-bar]'
 export const COMPOSER_DOCK_SELECTOR = '[class*="_dock"]'
 export const COMPOSER_MODES_SELECTOR = '[class*="_modes"]'
 /** The draft's own scroll area inside that card. */
@@ -235,6 +239,7 @@ export const SLOT_ANCHOR_SELECTOR = '[data-slot]'
  * utilities rather than the first match.
  */
 export const HEADER_TITLE_ROW_SELECTOR = '[class*="titleRow"]'
+export const HEADER_LEADING_SELECTOR = '[data-conversation-header-leading]'
 /**
  * The session title's breadcrumb nav: the words themselves, not the flex
  * cluster that lays them out (the cluster stretches, so it says nothing about

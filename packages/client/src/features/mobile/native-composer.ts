@@ -31,11 +31,12 @@ function useNativeInput() {
 }
 
 /** Native input remains uncontrolled; committed state goes through the host's input machine. */
-function createComposer(ctx: HostContext) {
+function createComposer(ctx: HostContext, updates: Set<() => void>) {
   return function NativeComposer(props: InputProps) {
     const enabled = useNativeInput()
     const input = props.useInput(snapshot => snapshot)
     const [ready, setReady] = React.useState(false)
+    const [hasStop, setHasStop] = React.useState(false), [empty, setEmpty] = React.useState(true)
     const active = enabled && ready && input.phase === 'plain' && props.sessionId !== undefined
     const wrap = React.useRef<HTMLDivElement>(null), area = React.useRef<HTMLTextAreaElement>(null)
     const pending = React.useRef<string | null>(null), composing = React.useRef(false)
@@ -53,17 +54,25 @@ function createComposer(ctx: HostContext) {
     }
     function card() {return wrap.current?.closest<HTMLElement>(COMPOSER_CARD_SELECTOR) ?? null}
     React.useEffect(() => {
-      const owner = card()
-      if (!owner) return
-      const update = () => {
+      let bound: HTMLElement | null = null
+      const observer = new MutationObserver(update)
+      function update() {
+        const owner = card()
+        if (!owner) return
+        if (owner !== bound) {
+          bound?.removeAttribute('data-dsh-claude-native-input')
+          observer.disconnect(); bound = owner
+          observer.observe(owner, {attributes: true, subtree: true, childList: true, attributeFilter: ['contenteditable','data-phase','role','data-dsh-claude-control']})
+          measure()
+        }
         const editor = owner.querySelector(COMPOSER_INPUT_SELECTOR)
         setReady(editor?.getAttribute('contenteditable') === 'true' && owner.getAttribute('role') !== 'button')
+        setHasStop(!!owner.querySelector('button[data-dsh-claude-control="stop"]'))
+        if (active && !owner.hasAttribute('data-dsh-claude-native-input')) owner.setAttribute('data-dsh-claude-native-input', '')
       }
-      update()
-      const observer = new MutationObserver(update)
-      observer.observe(owner, {attributes: true, subtree: true, childList: true, attributeFilter: ['contenteditable','data-phase','role']})
-      return () => observer.disconnect()
-    }, [props.sessionId, input.phase])
+      updates.add(update); update()
+      return () => {updates.delete(update); observer.disconnect(); bound?.removeAttribute('data-dsh-claude-native-input')}
+    }, [props.sessionId, input.phase, active])
     function measure() {
       const field = area.current, holder = wrap.current, scroll = card()?.querySelector<HTMLElement>(COMPOSER_SCROLL_SELECTOR)
       if (!field || !holder || !scroll || composing.current) return
@@ -81,6 +90,7 @@ function createComposer(ctx: HostContext) {
       const next = face?.state.getSnapshot().draft ?? current.current.draft
       if (document.activeElement === field && next !== '' && next !== lastPushed.current) return
       if (field.value !== next) field.value = next
+      setEmpty(!field.value.trim())
       if (document.activeElement !== field || next === '') measure()
     }
 
@@ -90,6 +100,7 @@ function createComposer(ctx: HostContext) {
       if (!owner || !editor || editor.getAttribute('contenteditable') !== 'true') return
       owner.setAttribute('data-dsh-claude-native-input', '')
       if (area.current) area.current.value = input.draft ?? ''
+      setEmpty(!(input.draft ?? '').trim())
       measure()
       let measuredWidth = owner.querySelector(COMPOSER_SCROLL_SELECTOR)?.getBoundingClientRect().width ?? 0
       const observer = new ResizeObserver(() => {
@@ -126,6 +137,7 @@ function createComposer(ctx: HostContext) {
       const value = event.currentTarget.value
       const previous = pending.current ?? current.current.draft
       pending.current = value
+      setEmpty(!value.trim())
       // Menu triggers need the draft now. Other typing waits for a commit
       // point to avoid rewriting the hidden Lexical surface under Android IMEs.
       const triggers = (text: string) => text.match(/[/@]/g)?.length ?? 0
@@ -152,6 +164,7 @@ function createComposer(ctx: HostContext) {
         },
       }),
       React.createElement('button', {key: 'send', type: 'button', className: 'dsh-claude-native-send', 'aria-label': '发送消息',
+        hidden: hasStop && empty, disabled: empty && !(input.attachmentIds?.length),
         onPointerDown: (event: React.PointerEvent) => event.preventDefault(), onClick: send}, '↑'),
     ] : null)
   }
@@ -166,6 +179,7 @@ function NativeToggle() {
 }
 
 export function installNativeComposer(ctx: HostContext) {
+  const updates = new Set<() => void>()
   let lastPointer: {target: EventTarget | null, time: number} = {target: null, time: 0}
   let lastKey = 0
   const pointer = (event: PointerEvent) => {lastPointer = {target: event.target, time: Date.now()}}
@@ -182,12 +196,13 @@ export function installNativeComposer(ctx: HostContext) {
   HTMLElement.prototype.focus = guardedFocus
   const fiber = ctx.inject?.(['slots'], scope => {
     const slots = scope.get('slots')
-    slots.inject('conversation.input.overlay', () => slots.register({name: 'conversation.input.overlay', id: 'claude-native-input', order: 40}, createComposer(ctx)))
+    slots.inject('conversation.input.overlay', () => slots.register({name: 'conversation.input.overlay', id: 'claude-native-input', order: 40}, createComposer(ctx, updates)))
     slots.inject('conversation.input.left', () => slots.register({name: 'conversation.input.left', id: 'claude-native-input-toggle', order: 60}, NativeToggle))
   })
-  return () => {
+  return {sync() {for (const update of updates) update()}, stop() {
     fiber?.dispose()
     document.removeEventListener('pointerdown', pointer, true); document.removeEventListener('keydown', key, true)
     if (HTMLElement.prototype.focus === guardedFocus) HTMLElement.prototype.focus = originalFocus
-  }
+    updates.clear()
+  }}
 }

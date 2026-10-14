@@ -75,7 +75,7 @@ interface HostDomEntry {
 }
 
 import { SIDEBAR_SLOT_SELECTOR, SIDEBAR_ROW_SELECTOR, SIDEBAR_LABEL_SELECTOR } from './dom'
-import { COMPOSER_TOOLS_SELECTOR, COMPOSER_TRAILING_SELECTOR, COMPOSER_DOCK_SELECTOR, COMPOSER_MODES_SELECTOR, HEADER_CLUSTER_SELECTOR, HEADER_ACTIONS_SELECTOR } from './dom'
+import { COMPOSER_TOOLS_SELECTOR, COMPOSER_TRAILING_SELECTOR, COMPOSER_STANDARD_SELECTOR, GOAL_BAR_SELECTOR, COMPOSER_DOCK_SELECTOR, COMPOSER_MODES_SELECTOR, HEADER_CLUSTER_SELECTOR, HEADER_ACTIONS_SELECTOR, HEADER_LEADING_SELECTOR } from './dom'
 import { SHELL_FRAME_SELECTOR, SHELL_RIGHTBAR_SELECTOR } from './dom'
 
 export const HOST_DOM: HostDomEntry[] = [
@@ -83,6 +83,9 @@ export const HOST_DOM: HostDomEntry[] = [
   { id: 'shell.rightbar', value: SHELL_RIGHTBAR_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'the native right panel shown as a phone overlay' },
   { id: 'composer.tools', value: COMPOSER_TOOLS_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'input tools that keep their native event handlers in the mobile toolbar' },
   { id: 'composer.trailing', value: COMPOSER_TRAILING_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'model and send controls whose parent is the input toolbar' },
+  { id: 'composer.standard', value: COMPOSER_STANDARD_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'native model and effort controls displayed in the phone tools window' },
+  { id: 'composer.goal', value: GOAL_BAR_SELECTOR, probe: { state: 'any', kind: 'none' }, use: 'optional goal dock; phone tools preserve its controls when a session has a goal' },
+  { id: 'header.leading', value: HEADER_LEADING_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'native leading header seat superseded by the phone drawer button' },
   { id: 'composer.dock', value: COMPOSER_DOCK_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'dock drawn separately from the mobile input instead of overlapping it' },
   { id: 'composer.modes', value: COMPOSER_MODES_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'permission modes accessible by expanding the mobile toolbar' },
   { id: 'header.cluster', value: HEADER_CLUSTER_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'title and header actions laid out separately on mobile' },

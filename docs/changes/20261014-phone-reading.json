@@ -1,0 +1,1 @@
+{"at":"2026-10-14","group":"improvements","order":3,"external":false,"zh":"手机阅读仅保留一行顶栏与紧凑输入栏，模型、统计和目标操作收入工具浮窗，有目标时保留提示圆点；对话页隐藏装饰吉祥物，减少浏览器可视区域的常驻占用。","en":"Phone reading keeps a one-row header and compact input bar. Models, statistics and goal actions open in Tools with a dot for a current goal; decorative mascots stay off conversations to reduce persistent viewport usage."}

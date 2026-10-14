@@ -13,6 +13,9 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 ### 体验优化
 
 - 迁入本地加载优化：对话分页与可恢复侧栏范围、按页面刷新、首页可见时统计、正文搜索按需索引、异步目录扫描与缓存；手机模块仅在窄屏或触屏加载。
+- 手机的「更多」和「工具」在浮窗内展开，保持顶栏与输入栏高度，限制在可视屏幕内，点击外侧或关闭按钮即可收起。版本升级保留固定设置入口与原有主题配置。
+- 桌面输入区增加多行空间，设置栏随宽度换行，上下文统计独立显示；原生输入在运行任务且草稿为空时让出发送位置，保持停止按钮可操作。
+- 手机阅读仅保留一行顶栏与紧凑输入栏，模型、统计和目标操作收入工具浮窗，有目标时保留提示圆点；对话页隐藏装饰吉祥物，减少浏览器可视区域的常驻占用。
 
 <h3 id="en-unreleased">New Features</h3>
 
@@ -21,6 +24,9 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 ### Improvements
 
 - Local loading changes add bounded conversation pages, reversible sidebar ranges, page-specific refreshes, visible dashboard polling, demand-driven text indexing, asynchronous log discovery and caches. Phone code loads only on narrow or touch screens.
+- Phone conversation actions and input tools open in floating windows within the visual viewport, preserving header and composer height. Dismiss outside or with the close button. Upgrades retain the stable settings namespace and existing theme preferences.
+- Desktop composers provide multiline space, a wrapping settings toolbar and a separate context statistics row. Native input yields the send position to the stop button while a task runs with an empty draft.
+- Phone reading keeps a one-row header and compact input bar. Models, statistics and goal actions open in Tools with a dot for a current goal; decorative mascots stay off conversations to reduce persistent viewport usage.
 
 ## [0.13.2] - 2026-10-11
 

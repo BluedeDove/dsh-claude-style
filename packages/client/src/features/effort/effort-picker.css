@@ -366,3 +366,7 @@ body[data-dsh-claude-style] .dsh-claude-effort-btn:hover {
   background: var(--dsh-claude-hover-bg, rgba(0, 0, 0, 0.08));
   color: var(--dsw-alias-label-primary, #141413);
 }
+
+@media (max-width: 720px) {
+  body[data-dsh-claude-style][data-dsh-claude-mobile-tools-open] .dsh-claude-effort-btn { z-index: 46; }
+}

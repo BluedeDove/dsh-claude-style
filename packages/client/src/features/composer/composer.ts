@@ -9,6 +9,7 @@ import type { FeatureUi } from '../../core/feature'
 import type manifest from './composer.manifest'
 import { closestFrom, setAttributeIfChanged } from '../../shared/dom'
 import { writeScroll } from '../../shared/scroll-owner'
+import { installComfortableComposer } from './comfortable'
 
 /** What other features read off the composer's reading (ui.composer). */
 export interface ComposerHandle extends FeatureHandle {
@@ -32,6 +33,7 @@ export interface ComposerHandle extends FeatureHandle {
  * the card when it changes height.
  */
 export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
+  const comfortable = installComfortableComposer()
   /** Whether the page shows the hero composer, as of the last reading. */
   let hero = false
   /** Whether the composer restyle applies to the page shown, as of the last reading. */
@@ -422,6 +424,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     syncAttachments(cards)
     syncDraftState(cards)
     syncControls(cards)
+    comfortable.sync(cards[0] ?? null)
     stampContextMeter(cards[0])
     syncChatTabComposer()
   }
@@ -473,6 +476,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   readState()
 
   return () => {
+    comfortable.stop()
     active = false
     heroCard = null
     document.body.removeAttribute(COMPOSER_ATTR)
