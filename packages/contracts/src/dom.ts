@@ -18,6 +18,8 @@
 export const FLOW_BLOCK_SELECTOR = '[data-chat-flow-key]'
 /** The chat column. */
 export const CHAT_FLOW_SELECTOR = '[data-chat-flow]'
+/** The user's durable attachment row; direct titled spans are file metadata cards. */
+export const MESSAGE_ATTACHMENTS_SELECTOR = '[data-message-attachments]'
 /**
  * One tool call's row. It lives inside the assistant block, so it does not
  * have to arrive as a new flow block of its own.

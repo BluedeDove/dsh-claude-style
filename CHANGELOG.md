@@ -16,10 +16,12 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 - 手机的「更多」和「工具」在浮窗内展开，保持顶栏与输入栏高度，限制在可视屏幕内，点击外侧或关闭按钮即可收起。版本升级保留固定设置入口与原有主题配置。
 - 桌面输入区增加多行空间，设置栏随宽度换行，上下文统计独立显示；原生输入在运行任务且草稿为空时让出发送位置，保持停止按钮可操作。
 - 手机阅读仅保留一行顶栏与紧凑输入栏，模型、统计和目标操作收入工具浮窗，有目标时保留提示圆点；对话页隐藏装饰吉祥物，减少浏览器可视区域的常驻占用。
+- 桌面上下文圆环与模型、推理等级同排，取消只放圆环的独立空行；设置栏换行后跟随模型控件，继续支持点击统计详情，手机仍放在工具浮窗内。
 
 ### 问题修复
 
 - 历史懒渲染保留宿主折叠语义：收起后隐藏思考、工具和中间说明，最终答案继续可见，展开及浏览器查找保持可用。工作室首页卡片、对话图片、Mermaid、SVG 和生成式组件居中，正文保持原有阅读方向。
+- 修复粘贴图片和插入引用后原生输入框仍停在旧位置、草稿不同步的问题；组合输入期间保持字段稳定。消息中的非图片附件改为紧凑文件条，保留名称、类型和大小，图片缩略图保持原有行为。
 
 <h3 id="en-unreleased">New Features</h3>
 
@@ -31,10 +33,12 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 - Phone conversation actions and input tools open in floating windows within the visual viewport, preserving header and composer height. Dismiss outside or with the close button. Upgrades retain the stable settings namespace and existing theme preferences.
 - Desktop composers provide multiline space, a wrapping settings toolbar and a separate context statistics row. Native input yields the send position to the stop button while a task runs with an empty draft.
 - Phone reading keeps a one-row header and compact input bar. Models, statistics and goal actions open in Tools with a dot for a current goal; decorative mascots stay off conversations to reduce persistent viewport usage.
+- Place the desktop context ring beside the model and reasoning controls, removing its separate row. Follow the model controls when the toolbar wraps and preserve the statistics popover; phones keep the ring inside Tools.
 
 ### Bug Fixes
 
 - Lazy history rendering preserves native folds: thoughts, tools and intermediate notes stay hidden while the final answer remains visible; reopening and browser find continue to work. Centre the studio dashboard, conversation images, Mermaid, SVG and generated components while preserving prose alignment.
+- Fix native-input positioning and draft synchronization after pasted images and inserted quotes while preserving composition stability. Show sent non-image attachments as compact file rows with their name, type and size; preserve image thumbnails.
 
 ## [0.13.2] - 2026-10-11
 

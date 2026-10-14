@@ -4,6 +4,7 @@ body[data-dsh-claude-style] [data-dsh-claude-native-input] [data-composer-input]
 body[data-dsh-claude-style] [data-dsh-claude-native-input] [data-composer-placeholder] { visibility: hidden; pointer-events: none; }
 body[data-dsh-claude-style] .dsh-claude-native-send { position: absolute; right: 6px; bottom: 6px; width: 40px; height: 40px; border: 0; border-radius: 12px; background: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-text); font-size: 24px; touch-action: manipulation; }
 body[data-dsh-claude-style] .dsh-claude-native-input:placeholder-shown + .dsh-claude-native-send { opacity: 0.45; }
+body[data-dsh-claude-style] .dsh-claude-native-send:disabled { opacity: 0.45; }
 body[data-dsh-claude-style] [data-dsh-claude-native-input] button[data-dsh-claude-control="send"] { visibility: hidden; }
 body[data-dsh-claude-style] [data-dsh-claude-native-input] button[data-dsh-claude-control="stop"] { z-index: 20; }
 body[data-dsh-claude-style] .dsh-claude-native-wrap:has(.dsh-claude-native-input:not(:placeholder-shown)) { z-index: 30; }

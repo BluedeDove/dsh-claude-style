@@ -10,10 +10,11 @@
   body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-toolbar] { height: auto; min-height: 48px; display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 8px 4px; margin-top: 4px; }
   body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-tools] { flex: 1 1 320px; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
   body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-trailing] { flex: 0 1 auto; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; margin-right: 0; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position="context"] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-trailing] { margin-right: var(--dsh-claude-meter-room, 0px); }
   body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant] [data-dsh-claude-composer-standard] { flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
   body[data-dsh-claude-style] [data-composer-card] [data-dsh-claude-composer-toolbar] button { min-height: 36px; }
   body[data-dsh-claude-style][data-dsh-claude-stats-position] [data-composer-card][data-composer-variant="inline"] :is(button[data-dsh-claude-control="send"], button[data-dsh-claude-control="stop"]) { right: 12px; top: 18px; bottom: auto; width: 40px; height: 40px; border-radius: 10px; z-index: 20; }
-  body[data-dsh-claude-style][data-dsh-claude-stats-position] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] {
+  body[data-dsh-claude-style][data-dsh-claude-stats-position="inline"] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] {
     position: relative;
     inset: auto;
     display: flex;
@@ -31,5 +32,5 @@
     justify-self: center;
     pointer-events: auto;
   }
-  body[data-dsh-claude-style][data-dsh-claude-stats-position] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] > [data-dsh-claude-context-meter] { position: relative; inset: auto; margin-left: auto; }
+  body[data-dsh-claude-style][data-dsh-claude-stats-position="inline"] [class*="_composerStack"][data-composer-variant] [data-composer-card] + [data-dsh-claude-composer-dock] > [data-dsh-claude-context-meter] { position: relative; inset: auto; margin-left: auto; }
 }

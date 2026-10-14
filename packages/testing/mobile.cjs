@@ -164,9 +164,18 @@ const mobileScenario = {
       const toolbar=await page.locator('[data-dsh-claude-composer-toolbar]').boundingBox()
       const groups=await page.locator('[data-dsh-claude-composer-tools], [data-dsh-claude-composer-trailing]').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,right:r.right,top:r.top,bottom:r.bottom}}))
       desktop.push(state)
-      checks.push(check(`${width} 像素桌面输入区、设置栏与统计保持独立`,state.scrollWidth===width&&state.field.height>=88&&toolbar.height>=48&&state.dock.top>=toolbar.y+toolbar.height&&groups.every(r=>r.x>=state.card.left&&r.right<=state.card.right),JSON.stringify({state,toolbar,groups})))
+      const ring=await page.locator('[data-dsh-claude-context-meter] button').boundingBox()
+      const model=await page.locator('[data-dsh-claude-composer-trailing]').boundingBox()
+      const effort=await page.locator('[data-dsh-claude-effort-trigger]:visible').count()?await page.locator('[data-dsh-claude-effort-trigger]:visible').boundingBox():null
+      const ringReachable=await page.locator('[data-dsh-claude-context-meter] button').evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})
+      checks.push(check(`${width} 像素桌面圆环与模型同排，不占额外一行`,state.scrollWidth===width&&state.field.height>=88&&toolbar.height>=48&&state.dock.top>=toolbar.y-1&&state.dock.bottom<=toolbar.y+toolbar.height+1&&Math.abs(ring.y+ring.height/2-model.y-model.height/2)<1&&ring.x>=model.x+model.width+7&&(!effort||ring.x>=effort.x+effort.width+7)&&ringReachable&&groups.every(r=>r.x>=state.card.left&&r.right<=state.card.right),JSON.stringify({state,toolbar,groups,ring,model,effort,ringReachable})))
     }
     fs.writeFileSync(path.join(out,'desktop-layout.json'),JSON.stringify(desktop,null,2))
+    await page.locator('[data-dsh-claude-context-meter] button').click()
+    await page.waitForSelector('[data-dsh-claude-context-panel]:visible')
+    checks.push(check('桌面圆环仍可点击查看统计详情',await page.locator('[data-dsh-claude-context-panel]:visible').count()>0))
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(250)
     await sanitizePage(expression=>page.evaluate(expression))
     for(const scheme of ['light','dark']) {
       await page.evaluate(dark=>document.body.toggleAttribute('data-ds-dark-theme',dark),scheme==='dark')

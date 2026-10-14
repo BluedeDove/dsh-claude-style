@@ -32,6 +32,7 @@ const readOverlay = (page) => page.evaluate(() => {
   const pillBox = box(trigger)
   return {
     row: box(row),
+    cluster: clusterBox,
     dock: box(card?.nextElementSibling ?? null),
     meter: box(meter),
     pill: pillBox,
@@ -84,8 +85,8 @@ const readOverlayWithWidePill = async (page) => {
 }
 
 /** Whether the dock stands on the row's own line, as the overlay is supposed to place it. */
-const onTheRow = (reading) => reading !== null && reading.dock !== null && reading.row !== null &&
-  reading.dock.top === reading.row.top && reading.dock.height === reading.row.height
+const onTheRow = (reading) => reading !== null && reading.dock !== null && reading.cluster !== null &&
+  reading.dock.top === reading.cluster.top && reading.dock.height === reading.cluster.height
 
 function statsOverlayScenario({ check }) {
   return {
@@ -114,8 +115,8 @@ function statsOverlayScenario({ check }) {
         check('the dock stands on the toolbar row\'s own line, measured off the row rather than assumed',
           onTheRow(resting) && Number.parseFloat(resting.offset) >= 0 && Number.parseFloat(resting.height) > 0,
           JSON.stringify(resting)),
-        check('a card leaving no gap under that row still keeps the meter on the row\'s line',
-          onTheRow(flush) && Number.parseFloat(flush.offset) === 0,
+        check('a card reducing the gap still keeps the meter on the model controls\' line',
+          onTheRow(flush) && Number.parseFloat(flush.offset) === Number.parseFloat(resting.offset) - 4,
           JSON.stringify(flush)),
         check('a card leaving a wider gap under that row keeps the meter on the row\'s line',
           onTheRow(wider) && Number.parseFloat(wider.offset) === Number.parseFloat(resting.offset) + 12,

@@ -45,6 +45,7 @@ const readPosition = (page) => page.evaluate(() => {
     trackColor: track === null ? null : getComputedStyle(track).stroke,
     dockPosition: dock === null ? null : getComputedStyle(dock).position,
     meterPosition: meter === null ? null : getComputedStyle(meter).position,
+    belowCard: card !== null && dock !== null && dock.getBoundingClientRect().top >= card.getBoundingClientRect().bottom - 1,
     blocks: document.querySelectorAll('.dsh-claude-context-stats').length,
   }
 })
@@ -194,7 +195,7 @@ function statsPositionScenario({ check }) {
           state.lineShown && state.text !== '' && state.figures.length === 6 &&
             state.figures.every((figure) => /\d/.test(figure)) &&
             state.glyphs === 0 && state.rowDisplay === 'none' &&
-            state.dockPosition === 'static' && state.meterPosition === 'static',
+            state.dockPosition !== 'absolute' && state.meterPosition !== 'absolute' && state.belowCard,
           JSON.stringify(state)),
         check('every figure is written one character per span, so a number that moved re-enters',
           state.animation === 'dsh-claude-digit-pop-in', JSON.stringify(state.animation)),

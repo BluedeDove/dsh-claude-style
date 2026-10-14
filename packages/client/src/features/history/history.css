@@ -3,4 +3,9 @@ body[data-dsh-claude-style] .dsh-claude-history-filter { display: flex; align-it
 body[data-dsh-claude-style] .dsh-claude-history-filter select { color: inherit; background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; padding: 5px; max-width: 130px; }
 /* Searchable folds use hidden="until-found". Their descendants must retain
    the host's hidden content visibility and zero collapsed height. */
+/* The host's file metadata spans stay beside the user's message. Images keep
+   their own gallery renderer; file names and type/size labels share one line. */
+body[data-dsh-claude-style] [data-message-attachments] > span[title] { flex: 0 1 auto; width: fit-content; max-width: 100%; min-height: 40px; padding: 6px 10px; gap: 8px; border-radius: 8px; }
+body[data-dsh-claude-style] [data-message-attachments] > span[title] > span { flex-direction: row; align-items: baseline; gap: 8px; }
+body[data-dsh-claude-style] [data-message-attachments] > span[title] > svg { width: 20px; height: 20px; }
 body[data-dsh-claude-style][data-dsh-claude-lazy] [data-chat-flow-key]:not([hidden], [hidden] *, [data-streaming]):not(:has([data-streaming], [data-chat-running])) { content-visibility: auto; contain-intrinsic-size: auto 240px; }

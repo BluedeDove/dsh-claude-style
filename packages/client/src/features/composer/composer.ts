@@ -195,6 +195,8 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   let meterReading = ''
   let meterMeasuredActive = false
   let meterWidth = 0
+  let meterSizeNode: HTMLElement | null = null
+  let stopMeterSize: (() => void) | null = null
   /** The toolbar row's own box as <body> carries it (`"offset height"`), and the box it was read from. */
   let meterRow = ''
   let meterRowBox: Element | null = null
@@ -216,7 +218,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   function stampMeterRow(card: HTMLElement | undefined, meter: HTMLElement | null) {
     const row = card === undefined || !active || readPrefs().statsPosition !== STATS_POSITION_CONTEXT || meter === null
       ? null
-      : card.querySelector('[class*="_trailing"]')?.parentElement ?? null
+      : card.querySelector('[class*="_trailing"]')
     const stack = row === null ? null : closestFrom(row, COMPOSER_STACK)
     // The band a mobile plugin's strip took is measured on every pass: the strip
     // appears and leaves without any size of this row changing, so the row's own
@@ -247,6 +249,8 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
       meterRow = ''
     }
     if (meterRow !== '') return
+    // The controls can wrap below the tools. Anchor the meter to their band,
+    // so the ring stays beside the model rather than between toolbar rows.
     const rowBox = row.getBoundingClientRect()
     if (rowBox.height <= 0) return
     const stackBox = stack.getBoundingClientRect()
@@ -364,6 +368,16 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     let meter = meterNode
     if (card === undefined) meter = null
     else if (meter === null) meter = dockedContextMeter(composerDock(card))
+    if (meterSizeNode !== meter) {
+      stopMeterSize?.(); stopMeterSize = null; meterSizeNode = meter
+      const trigger = meter?.querySelector('button') ?? null
+      if (meter) stopMeterSize = observeSize(trigger ? [meter, trigger] : [meter], () => {
+        // Responsive labels and font loading change the pill without changing
+        // its text. Reserve its current width after those changes settle.
+        meterReading = ''
+        stampContextMeter(findComposerCards()[0])
+      })
+    }
     let room = ''
     if (meter !== null) {
       meter.toggleAttribute('data-dsh-claude-context-meter', true)
@@ -500,6 +514,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     document.body.style.removeProperty(METER_ROW_HEIGHT)
     releaseMobileStats()
     meterNode = null
+    stopMeterSize?.(); stopMeterSize = null; meterSizeNode = null
     meterReading = ''
     meterMeasuredActive = false
     meterWidth = 0

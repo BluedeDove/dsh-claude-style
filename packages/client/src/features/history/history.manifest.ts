@@ -3,7 +3,7 @@ import type { FeatureManifest } from '../../core/feature'
 export default {
   id: 'history', order: 15,
   ungated: 'Bounded history pages and reversible sidebar filtering keep the catalog usable.',
-  contracts: ['sidebar.root', 'sidebar.row', 'sidebar.label', 'chat.flow-block', 'chat.streaming', 'chat.running'],
+  contracts: ['sidebar.root', 'sidebar.row', 'sidebar.label', 'chat.flow-block', 'chat.streaming', 'chat.running', 'chat.message-attachments'],
   stylesheets: [{file: 'history.css', rank: 995}],
   cases: [],
   description: {

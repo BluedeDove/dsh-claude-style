@@ -15,11 +15,11 @@ export default {
   description: {
     zh: {
       title: '输入区',
-      text: '新会话页与对话页使用输入卡片：桌面输入区留出多行空间，设置栏按宽度换行，上下文统计在独立区域。附件排成缩略图，点卡片空白处可以输入，卡片变高时停在底部的对话跟着上移。设置页「输入区」可以选只改新会话页、只改对话页、两处都改或关闭。',
+      text: '新会话页与对话页使用输入卡片：桌面输入区留出多行空间，设置栏按宽度换行，上下文圆环与模型同排，完整统计可以选择独立显示。附件排成缩略图，点卡片空白处可以输入，卡片变高时停在底部的对话跟着上移。设置页「输入区」可以选只改新会话页、只改对话页、两处都改或关闭。',
     },
     en: {
       title: 'Composer',
-      text: 'Desktop input cards provide multiline space, a wrapping settings toolbar and a separate context statistics area. Attachments appear as thumbnails, pressing the blank card focuses the editor, and conversations resting at the bottom follow card growth. The Composer tab chooses the home page alone, the conversation alone, both, or neither.',
+      text: 'Desktop input cards provide multiline space and a wrapping toolbar, with the context ring beside the model and an optional separate statistics line. Attachments appear as thumbnails, pressing the blank card focuses the editor, and conversations resting at the bottom follow card growth. The Composer tab chooses the home page alone, the conversation alone, both, or neither.',
     },
   },
 } satisfies FeatureManifest

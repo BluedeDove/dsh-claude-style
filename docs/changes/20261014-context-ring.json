@@ -1,0 +1,1 @@
+{"at":"2026-10-14","group":"improvements","order":4,"external":false,"zh":"桌面上下文圆环与模型、推理等级同排，取消只放圆环的独立空行；设置栏换行后跟随模型控件，继续支持点击统计详情，手机仍放在工具浮窗内。","en":"Place the desktop context ring beside the model and reasoning controls, removing its separate row. Follow the model controls when the toolbar wraps and preserve the statistics popover; phones keep the ring inside Tools."}

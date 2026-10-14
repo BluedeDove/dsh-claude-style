@@ -2,7 +2,7 @@
   "name": "dsh-claude-style-maintained",
   "private": true,
   "description": "Claude Code Desktop theme for DeepSeek Harness (dsh) web GUI — visual & interaction overhaul",
-  "version": "0.13.2-maintained.3",
+  "version": "0.13.2-maintained.4",
   "type": "module",
   "main": "lib/host/index.js",
   "icon": "lib/claude-mark.svg",
