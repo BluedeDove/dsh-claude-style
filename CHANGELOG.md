@@ -17,6 +17,10 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 - 桌面输入区增加多行空间，设置栏随宽度换行，上下文统计独立显示；原生输入在运行任务且草稿为空时让出发送位置，保持停止按钮可操作。
 - 手机阅读仅保留一行顶栏与紧凑输入栏，模型、统计和目标操作收入工具浮窗，有目标时保留提示圆点；对话页隐藏装饰吉祥物，减少浏览器可视区域的常驻占用。
 
+### 问题修复
+
+- 历史懒渲染保留宿主折叠语义：收起后隐藏思考、工具和中间说明，最终答案继续可见，展开及浏览器查找保持可用。工作室首页卡片、对话图片、Mermaid、SVG 和生成式组件居中，正文保持原有阅读方向。
+
 <h3 id="en-unreleased">New Features</h3>
 
 - Built-in phone interface adds a drawer sidebar, compact header, expandable tools and separate statistics; native input preserves composition, drafts, commands and attachments. Disable the two previous phone plugins when enabling it.
@@ -27,6 +31,10 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 - Phone conversation actions and input tools open in floating windows within the visual viewport, preserving header and composer height. Dismiss outside or with the close button. Upgrades retain the stable settings namespace and existing theme preferences.
 - Desktop composers provide multiline space, a wrapping settings toolbar and a separate context statistics row. Native input yields the send position to the stop button while a task runs with an empty draft.
 - Phone reading keeps a one-row header and compact input bar. Models, statistics and goal actions open in Tools with a dot for a current goal; decorative mascots stay off conversations to reduce persistent viewport usage.
+
+### Bug Fixes
+
+- Lazy history rendering preserves native folds: thoughts, tools and intermediate notes stay hidden while the final answer remains visible; reopening and browser find continue to work. Centre the studio dashboard, conversation images, Mermaid, SVG and generated components while preserving prose alignment.
 
 ## [0.13.2] - 2026-10-11
 

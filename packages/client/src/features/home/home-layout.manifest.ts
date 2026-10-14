@@ -14,11 +14,11 @@ export default {
   description: {
     zh: {
       title: '首页版面',
-      text: '「经典」是居中的问候语与输入卡片；「工作室」把问候语移到左上角、输入卡片贴着窗口底边，中间是用量面板：近期的用量热力图、各模型的用量与费用。',
+      text: '「经典」是居中的问候语与输入卡片；「工作室」在顶部居中显示问候语与用量面板，输入卡片贴着窗口底边。用量面板展示近期的用量热力图、各模型的用量与费用。',
     },
     en: {
       title: 'Home layout',
-      text: 'Classic is the centred greeting over the input card. Studio moves the greeting to the top left, pins the input card to the window\'s bottom edge and fills the space between with a usage panel: a heat map of recent usage and the usage and cost of each model.',
+      text: 'Classic is the centred greeting over the input card. Studio centres the greeting and usage panel at the top and pins the input card to the window\'s bottom edge. The panel shows a heat map of recent usage and the usage and cost of each model.',
     },
   },
 } satisfies FeatureManifest

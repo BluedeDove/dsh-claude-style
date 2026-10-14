@@ -49,6 +49,15 @@ const LONG_PIECES = []
 for (let at = 0; at < LONG_LINES.length; at += 5) LONG_PIECES.push(LONG_LINES.slice(at, at + 5).join(''))
 
 const SCRIPTS = {
+  visuals: {
+    conversation: [{text: ['# 内容布局检查\n\n正文保持正常阅读方向。\n\n',
+      '![居中图片](./alignment.png)\n\n',
+      '| 项目 | 状态 |\n| --- | --- |\n| 图片 | 正常 |\n| 表格 | 正常 |\n\n',
+      '```dsh-ui\n{"type":"mermaid","code":"graph TD\\nA[开始]-->B[完成]"}\n```\n\n',
+      '```dsh-ui\n{"type":"card","title":"卡片布局","items":[{"type":"text","content":"卡片内部保持原有排列。"}]}\n```\n\n',
+      '布局检查完成。']}],
+    auxiliary: {text:['内容布局检查']},
+  },
   /** The lane's default: a thought, then markdown in a few pieces. */
   greeting: {
     conversation: [

@@ -1,4 +1,6 @@
 body[data-dsh-claude-style] [data-dsh-claude-old="true"] { display: none !important; }
 body[data-dsh-claude-style] .dsh-claude-history-filter { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 8px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
 body[data-dsh-claude-style] .dsh-claude-history-filter select { color: inherit; background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; padding: 5px; max-width: 130px; }
-body[data-dsh-claude-style][data-dsh-claude-lazy] [data-chat-flow-key]:not([data-streaming]):not(:has([data-streaming], [data-chat-running])) { content-visibility: auto; contain-intrinsic-size: auto 240px; }
+/* Searchable folds use hidden="until-found". Their descendants must retain
+   the host's hidden content visibility and zero collapsed height. */
+body[data-dsh-claude-style][data-dsh-claude-lazy] [data-chat-flow-key]:not([hidden], [hidden] *, [data-streaming]):not(:has([data-streaming], [data-chat-running])) { content-visibility: auto; contain-intrinsic-size: auto 240px; }

@@ -501,11 +501,11 @@ inside `…_composerStack …_composerHero` — so only the arrangement differs.
 
 | | Classic | Studio |
 |---|---|---|
-| greeting | centred, 44.2px serif, brand mark on its line | top left, one fixed line naming the user ("What's up next, …?") in the 20px sans UI face, a 21px brand mark on its line |
+| greeting | centred, 44.2px serif, brand mark on its line | centred at the top, one fixed line naming the user ("What's up next, …?") in the 20px sans UI face, a 21px brand mark on its line |
 | composer card | vertically centred in the scroll body | the conversation's single-line inline form, resting on the window's bottom edge (16px foot) |
 | between them | — | the usage panel |
 | workspace / preset row | the card's footer tray | hairline chips directly above the card |
-| column width | the hero's centred box | a 720px composer column; the greeting and the panel form a 480px block against its left edge |
+| column width | the hero's centred box | a 720px composer column; the greeting and the 640px panel share its centre, shrinking to fit a narrow screen |
 
 The studio composer is stamped `data-composer-variant="inline"` (composer.ts's
 pass reads the same preference), so the home card is drawn by the conversation's

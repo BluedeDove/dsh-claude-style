@@ -87,6 +87,15 @@ body[data-dsh-claude-style] :is(h1, [class*="headline"]) {
 }
 
 /* ---------- markdown document prose ---------- */
+/* Image previews retain their native click target; only the media box is
+   centred, leaving paragraphs and code in their normal reading direction. */
+body[data-dsh-claude-style] [data-chat-flow] [class*="markdown"] img,
+body[data-dsh-claude-style] [data-chat-flow] [class*="markdown"] button:has(> img:only-child) {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
 /* Conversation prose — body and headings alike — takes the serif face and lets
    Chinese fall through to a sans CJK; the display rule above stays for headlines. */
 body[data-dsh-claude-style] [class*="markdown"] {

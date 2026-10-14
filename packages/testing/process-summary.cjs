@@ -70,6 +70,19 @@ const readHeaders = (page) => page.evaluate(() => [...document.querySelectorAll(
   }
 }))
 
+/** Read actual row geometry so a lazy-rendering override cannot pass as folded. */
+const readProcessVisibility = page => page.evaluate(() => {
+  const rows = [...document.querySelectorAll('[data-turn-process-member]')]
+  const note = rows.find(row => row.getAttribute('data-chat-group-part') === 'response')
+  const answer = [...document.querySelectorAll('[data-chat-group-part="response"]')].find(row => !row.hasAttribute('data-turn-process-member'))
+  return {members: rows.length, hidden: rows.filter(row => row.hasAttribute('hidden')).length,
+    occupied: rows.filter(row => row.getBoundingClientRect().height > 0).length,
+    noteVisible: note !== undefined && note.getBoundingClientRect().height > 0 && note.checkVisibility({contentVisibilityAuto:true}),
+    noteContentVisibility: note === undefined ? null : getComputedStyle(note).contentVisibility,
+    answerVisible: answer?.checkVisibility({contentVisibilityAuto:true}) ?? false,
+    answerText: answer?.innerText ?? ''}
+})
+
 function processSummaryScenario({ check }) {
   return {
     script: 'process',
@@ -91,6 +104,7 @@ function processSummaryScenario({ check }) {
     },
     async afterTurn(context) {
       const { page } = context
+      context.notes.processClosed = await readProcessVisibility(page)
       // The tiers that cap the body fold the finished turn's process under the
       // host's own control, which is what opens the groups; the detailed tier
       // keeps them open and disables that control.
@@ -98,12 +112,25 @@ function processSummaryScenario({ check }) {
       if (await control.isEnabled()) await control.click()
       await page.waitForTimeout(500)
       context.notes.headers = await readHeaders(page)
+      context.notes.processOpen = await readProcessVisibility(page)
+      if (await control.isEnabled()) {
+        await control.click()
+        await page.waitForTimeout(300)
+        context.notes.processClosedAgain = await readProcessVisibility(page)
+        // Chromium sends beforematch on a searchable hidden row. The native
+        // handler must still reveal the turn after lazy rendering is applied.
+        await page.evaluate(() => document.querySelector('[data-turn-process-member][data-chat-group-part="response"]').dispatchEvent(new Event('beforematch')))
+        await page.waitForTimeout(300)
+        context.notes.processFound = await readProcessVisibility(page)
+      }
     },
     async assert({ session, notes }) {
       const early = notes.waitEarly ?? {}
       const overtime = notes.waitOvertime ?? {}
       const working = notes.waitWorking ?? {}
       const headers = notes.headers ?? []
+      const closed = notes.processClosed ?? {}, open = notes.processOpen ?? {}
+      const again = notes.processClosedAgain ?? {}, found = notes.processFound ?? {}
       // The page's own language, read off the line the skin wrote: the same two
       // languages the copy document carries.
       const lang = working.label === COPY.chatWaitThinking.zh ? 'zh' : 'en'
@@ -113,6 +140,12 @@ function processSummaryScenario({ check }) {
         sentence([fill(COPY.processSummaryFullThoughtOne[lang], 1), fill(COPY.processSummaryFullToolOne[lang], 1)]),
       ]
       return [
+        check('collapsed history hides every intermediate row and keeps the final answer visible',
+          closed.members > 0 && closed.hidden === closed.members && closed.occupied === 0 && !closed.noteVisible && closed.noteContentVisibility === 'hidden' && closed.answerVisible && closed.answerText.includes('这是最终答案'), JSON.stringify(closed)),
+        check('opening and closing the turn restores the intermediate note without losing the answer',
+          open.hidden === 0 && open.noteVisible && open.answerVisible && again.hidden === again.members && again.occupied === 0 && again.answerVisible, JSON.stringify({open,again})),
+        check('browser find can still reveal a folded intermediate note',
+          found.hidden === 0 && found.noteVisible && found.answerVisible, JSON.stringify(found)),
         check('the running row carries the skin\'s line in place of the host\'s words',
           early.line === true && early.wordsShown === false, JSON.stringify(early)),
         check('a turn whose state cannot be read falls back to the host\'s own word',

@@ -20,8 +20,7 @@ body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_composerSeat"] 
 /* The stack becomes the column: greeting, panel, context row, card. Its own
    32px foot is the hero's centred-box treatment; the studio form drops the foot
    and fills the seat, so the context row and the card rest on the bottom edge.
-   The composer keeps the 720px column, while the greeting and the dashboard
-   card read as a 480px block against its left edge. */
+   The greeting and dashboard share the centre of the composer column. */
 body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_composerStack"][class*="_composerHero"] {
   /* The conversation form's own rule pins this stack to its content height; the
      studio column has to fill the seat for the card to reach the bottom edge.
@@ -43,8 +42,7 @@ body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_composerStack"]
 body[data-dsh-claude-style][data-dsh-claude-home-layout="studio"] [class*="_composerHero"] > :has([class*="_headline"]) {
   order: 0;
   height: auto;
-  justify-content: flex-start;
-  /* The greeting's left edge lands on the panel's and the card's. */
+  justify-content: center;
   padding: 14px var(--dsh-composer-side-clearance, 0px) 0;
   margin-bottom: 30px;
 }
@@ -62,13 +60,9 @@ body[data-dsh-claude-style][data-dsh-claude-home-layout="studio"] [class*="_comp
      the bottom, and the panel scrolls inside the room between them. */
   flex: 0 1 auto;
   min-height: 0;
-  /* The panel is the narrow dashboard card, left-aligned on the composer's own
-     left edge; the free width to its right stays empty. The width is stated
-     rather than left to the content, so the head's copy length cannot resize the
-     card. */
-  width: 480px;
-  max-width: calc(100% - var(--dsh-composer-side-clearance, 0px));
-  margin-right: auto;
+  width: 640px;
+  max-width: calc(100% - 2 * var(--dsh-composer-side-clearance, 0px));
+  margin-inline: auto;
 }
 
 body[data-dsh-claude-style][data-dsh-claude-home-layout="studio"] [class*="_composerHero"] > [class*="_heroWorkspaceRow"] {
@@ -107,7 +101,7 @@ body[data-dsh-claude-style][data-dsh-claude-home-layout="studio"] [class*="_comp
 body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_headline"],
 body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_headline"] [class*="titleGroup"],
 body[data-dsh-claude-style][data-dsh-claude-home-hero] [class*="_headline"] [class*="titleGroup"] > span {
-  justify-content: flex-start;
+  justify-content: center;
   font-family: var(--dsw-font-family);
   font-size: 20px;
   font-weight: 500;

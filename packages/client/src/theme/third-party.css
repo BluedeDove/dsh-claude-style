@@ -1,3 +1,19 @@
+/* ---------- Third-party layout: dsh-genui conversation blocks ---------- */
+/* dsh-genui exposes semantic marks for its answer blocks and rendered diagrams.
+   Bound the complete block without changing its internal component layout. */
+body[data-dsh-claude-style] [data-chat-flow] :is([data-genui], [data-genui-svg-fence]) {
+  min-width: 0;
+  max-width: min(100%, 960px);
+  margin-inline: auto;
+}
+
+body[data-dsh-claude-style] [data-chat-flow] :is([data-genui-mermaid], [data-genui-svg], [data-genui-diagram]) > :is(svg, img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
 /* ---------- Third-party repair: dsh-agy-link run_code fallback card ---------- */
 /* The agy-link bridge replaces the host run_code tool card with its own keyed
    toolview; its non-mirror fallback ships an unstyled header (two bare spans,

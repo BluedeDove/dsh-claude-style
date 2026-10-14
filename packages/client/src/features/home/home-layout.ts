@@ -18,7 +18,7 @@ import type manifest from './home-layout.manifest'
  *
  * `classic` is the hero the skin has always drawn: brand mark and greeting
  * centred, composer under them, everything vertically centred in the scroll
- * body. `studio` is the dashboard form — the greeting moves to the top left,
+ * body. `studio` is the dashboard form — the greeting stays centred at the top,
  * the composer hugs the window's bottom edge, and the space between them
  * carries a usage panel. The two differ only in arrangement, so the switch
  * is one body attribute the stylesheet branches on; the host keeps owning the
