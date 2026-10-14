@@ -295,6 +295,9 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
   const assetsDir = join(root, 'lib', 'assets')
   /** The decompressed payload of each brotli-stored asset served to a client that cannot take it. */
   const unpressed = new Map()
+  const assetBodies = new Map<string, Buffer>()
+  let manifestCache: Record<string, {type: string, encoding?: string}> | undefined
+  const development = process.env.DSH_CLAUDE_STYLE_DEBUG === '1'
 
   /**
    * Answer one request under the route prefix with a static file.
@@ -312,9 +315,11 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
       res.end()
       return
     }
-    // Read per request: the files are small, and an in-place edit then shows
-    // up on reload without restarting the host.
-    const payload = body ?? readFileSync(path)
+    // Immutable bundled assets are shared between requests. User files and
+    // development builds retain their per-request reads (D1000).
+    const bundled = path.startsWith(`${assetsDir}${sep}`) && !development
+    const payload = body ?? (bundled ? assetBodies.get(path) : undefined) ?? readFileSync(path)
+    if (bundled && body === null) assetBodies.set(path, payload)
     res.writeHead(200, {
       ...headers,
       'content-length': String(payload.byteLength),
@@ -373,10 +378,13 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
 
   /** The build's asset manifest, or undefined when the build has not run. */
   const readManifest = () => {
+    if (!development && manifestCache !== undefined) return manifestCache
     const path = join(assetsDir, ASSETS_MANIFEST)
     if (!existsSync(path)) return undefined
     try {
-      return JSON.parse(readFileSync(path, 'utf8')).assets
+      const assets = JSON.parse(readFileSync(path, 'utf8')).assets
+      if (!development) manifestCache = assets
+      return assets
     } catch (error) {
       // A manifest that cannot be read is a build that did not finish; say so
       // once per request and answer 404 rather than failing the route (D12).
@@ -606,7 +614,7 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
         if (fenceRefused(req, res)) return
         const query = (new URL(req.url ?? '/', 'http://local').searchParams.get('q') ?? '').trim().slice(0, QUERY_MAX)
         const answer = query === ''
-          ? sessionSearch.warm().then(() => ({ sessions: [] }))
+          ? Promise.resolve().then(() => { sessionSearch.begin(); return {sessions: [], deferred: true} })
           : sessionSearch.search(query)
         void answer.then((value: object) => {
           sendJson(res, 200, { ok: true, ...value })
@@ -639,6 +647,7 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
 
     return () => {
       usage.dispose()
+      sessionSearch.dispose()
       peakrate.dispose()
       // One route's disposer failing must not keep the others registered
       // (docs/decisions D12); the failure is reported.

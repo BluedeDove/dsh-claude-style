@@ -231,6 +231,38 @@ export function createHomeUsage(ctx: HostContext) {
   const listeners: (() => void)[] = []
   let pollTimer: ReturnType<typeof setTimeout> | null = null
   let disposed = false
+  let active = false
+  let nextAttemptAt = 0
+  let fetchedAt = 0
+  let controller: AbortController | null = null
+  let metadata: any = null
+  let metadataSnapshot: any = null
+  let stopMetadata: (() => void) | null = null
+  let activationTimer: ReturnType<typeof setTimeout> | null = null
+  let metadataWaiting = typeof ctx.inject === 'function'
+  const metadataFiber = ctx.inject?.(['sessions'], scope => {
+    metadataWaiting = false
+    metadata = scope.get('sessions')
+    if (!metadata?.list) return
+    stopMetadata = metadata.list.subscribe(() => { if (active) loadSessionSummary() })
+    if (active) loadSessionSummary()
+  })
+
+  function setActive(wanted: boolean) {
+    const next = wanted && !document.hidden
+    if (next === active) return
+    active = next
+    if (!active) { stopPolling(); if (activationTimer !== null) clearTimeout(activationTimer); activationTimer = null; return }
+    // The host briefly paints a hero before restoring the selected session.
+    // Wait for that route to settle before starting history statistics.
+    activationTimer = setTimeout(() => {
+      activationTimer = null
+      if (!active || disposed) return
+      usage.polls = 0
+      loadUsage(usage.computing || (usage.value !== null && Date.now() - fetchedAt > 60000))
+      loadSessionSummary()
+    }, 750)
+  }
 
   function emit() {
     notifyAll(listeners)
@@ -256,38 +288,47 @@ export function createHomeUsage(ctx: HostContext) {
    * panel fills in as soon as the host half has the numbers.
    */
   function loadUsage(force?: boolean) {
-    if (disposed || usage.loading) return
+    if (disposed || !active || activationTimer !== null || document.hidden || usage.loading) return
+    if (!force && (pollTimer !== null || Date.now() < nextAttemptAt)) return
     if (!force && usage.value !== null && !usage.computing) return
     usage.loading = true
-    const request = fetch(USAGE_ROUTE, { credentials: 'same-origin', headers: { accept: 'application/json' } })
+    controller = new AbortController()
+    const request = fetch(USAGE_ROUTE, { credentials: 'same-origin', headers: { accept: 'application/json' }, signal: controller.signal })
     request.then(response => response !== null && response.ok === true ? response.json() : null).then((body: UsageAnswer | null) => {
       usage.loading = false
       if (disposed) return
       if (body === null || body.ok !== true) {
         usage.error = 'unavailable'
+        retryLater(15000)
         emit()
         return
       }
       usage.value = body.value === undefined ? null : body.value
       usage.computing = body.computing === true
       usage.error = body.error === undefined ? null : body.error
+      fetchedAt = Date.now()
       emit()
       if (usage.computing) {
-        if (usage.polls >= HOME_POLL_MAX) return
         usage.polls += 1
-        stopPolling()
-        pollTimer = setTimeout(() => {
-          pollTimer = null
-          loadUsage(true)
-        }, HOME_POLL_MS)
+        retryLater(Math.min(4000, HOME_POLL_MS * Math.max(1, Math.floor(usage.polls / 4))))
+      } else if (usage.error || usage.value === null) {
+        retryLater(15000)
       }
     // A failed usage fetch is the panel's "unavailable" state, not an exception: the panel renders without the numbers (D12).
     }).catch(() => {
       usage.loading = false
       if (disposed) return
       usage.error = 'unavailable'
+      retryLater(15000)
       emit()
     })
+  }
+
+  function retryLater(ms: number) {
+    nextAttemptAt = Date.now() + ms
+    stopPolling()
+    if (!active || disposed || document.hidden) return
+    pollTimer = setTimeout(() => { pollTimer = null; loadUsage(true) }, ms)
   }
 
   /**
@@ -364,7 +405,19 @@ export function createHomeUsage(ctx: HostContext) {
 
   /** Read the session list once; a host without the remote service keeps the route's answer. */
   function loadSessionSummary() {
-    if (disposed || listLoading || listSummary !== null) return
+    if (disposed || !active || listLoading) return
+    if (metadata) {
+      const snapshot = metadata.list.getSnapshot()
+      if (snapshot.phase !== 'ready' || snapshot === metadataSnapshot) return
+      metadataSnapshot = snapshot
+      listSummary = summarizeSessionList(snapshot.ids.map((id: string) => {
+        const row = snapshot.byId[id]
+        return {...row, projections: {values: row.projectionValues || row.projections?.values}}
+      }))
+      emit()
+      return
+    }
+    if (metadataWaiting || listSummary !== null) return
     const sessions = ctx.get('remote.session')
     if (sessions === undefined || sessions === null || typeof sessions.list !== 'function') return
     listLoading = true
@@ -393,9 +446,14 @@ export function createHomeUsage(ctx: HostContext) {
     notify: emit,
     load: loadUsage,
     loadList: loadSessionSummary,
+    setActive,
     stop() {
       disposed = true
+      if (activationTimer !== null) clearTimeout(activationTimer)
       stopPolling()
+      controller?.abort()
+      stopMetadata?.()
+      metadataFiber?.dispose()
       listeners.length = 0
     },
   }

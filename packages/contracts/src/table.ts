@@ -49,6 +49,8 @@ interface HostDomProbe {
   min?: number
   /** The entry a relative selector or a geometry check is resolved against. */
   within?: string
+  /** An older host can expose the same surface under the named contract instead. */
+  alternative?: string
 }
 
 /**
@@ -72,7 +74,22 @@ interface HostDomEntry {
   owner?: 'core'
 }
 
+import { SIDEBAR_SLOT_SELECTOR, SIDEBAR_ROW_SELECTOR, SIDEBAR_LABEL_SELECTOR } from './dom'
+import { COMPOSER_TOOLS_SELECTOR, COMPOSER_TRAILING_SELECTOR, COMPOSER_DOCK_SELECTOR, COMPOSER_MODES_SELECTOR, HEADER_CLUSTER_SELECTOR, HEADER_ACTIONS_SELECTOR } from './dom'
+import { SHELL_FRAME_SELECTOR, SHELL_RIGHTBAR_SELECTOR } from './dom'
+
 export const HOST_DOM: HostDomEntry[] = [
+  { id: 'shell.frame', value: SHELL_FRAME_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'the shell frame resolved relative to its sidebar; phone columns cover the viewport' },
+  { id: 'shell.rightbar', value: SHELL_RIGHTBAR_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'the native right panel shown as a phone overlay' },
+  { id: 'composer.tools', value: COMPOSER_TOOLS_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'input tools that keep their native event handlers in the mobile toolbar' },
+  { id: 'composer.trailing', value: COMPOSER_TRAILING_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'model and send controls whose parent is the input toolbar' },
+  { id: 'composer.dock', value: COMPOSER_DOCK_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'dock drawn separately from the mobile input instead of overlapping it' },
+  { id: 'composer.modes', value: COMPOSER_MODES_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'permission modes accessible by expanding the mobile toolbar' },
+  { id: 'header.cluster', value: HEADER_CLUSTER_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'title and header actions laid out separately on mobile' },
+  { id: 'header.actions', value: HEADER_ACTIONS_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'preset and team actions available in the expanded mobile header' },
+  { id: 'sidebar.root', value: SIDEBAR_SLOT_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'the sidebar tree scoped independently from streamed chat text' },
+  { id: 'sidebar.row', value: SIDEBAR_ROW_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'workspace and session identities for the reversible age filter' },
+  { id: 'sidebar.label', value: SIDEBAR_LABEL_SELECTOR, probe: { state: 'any', kind: 'selector' }, use: 'the workspace section where the age range control is mounted' },
   { id: 'chat.flow-block', value: FLOW_BLOCK_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'a new flow block: this piece of the stream moved on' },
   { id: 'chat.flow', value: CHAT_FLOW_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'the chat column: the root every chat-area behaviour scopes to' },
   { id: 'chat.call', value: CHAT_CALL_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'one tool call row: structure the follow watches for' },
@@ -100,7 +117,7 @@ export const HOST_DOM: HostDomEntry[] = [
   { id: 'composer.placeholder', value: COMPOSER_PLACEHOLDER_SELECTOR, probe: { state: 'hero', kind: 'selector' }, use: 'the placeholder the host\u2019s own editor draws inside the draft' },
   { id: 'composer.stats', value: COMPOSER_STATS_SELECTOR, probe: { state: 'any', kind: 'none' }, use: 'the container the host marked around its statistics before it marked each figure; the skin reads whichever is there' },
   { id: 'composer.mobile-stats', value: MOBILE_STATS_SELECTOR, probe: { state: 'any', kind: 'none' }, use: 'the statistics strip a mobile plugin draws in the dock\u2019s own band; the composer pass lifts its line above whatever height this strip has, and the lane\u2019s stand-in page carries one for the statsPosition case' },
-  { id: 'composer.stat', value: COMPOSER_STAT_SELECTOR, probe: { state: 'conversation', kind: 'selector' }, use: 'one figure of the host\u2019s statistics in the composer stack, which the context panel repeats (D27)' },
+  { id: 'composer.stat', value: COMPOSER_STAT_SELECTOR, probe: { state: 'conversation', kind: 'selector', alternative: 'composer.stats' }, use: 'individual statistics in newer hosts; 0.2.0 exposes the composer.stats container instead, and at least one form must exist' },
   { id: 'composer.variant', value: COMPOSER_VARIANT_ATTRIBUTE, probe: { state: 'hero', kind: 'attribute' }, use: 'which composer the host rendered: the hero\u2019s or the conversation\u2019s' },
   { id: 'composer.access-trigger', value: PERMISSION_TRIGGER_SELECTOR, probe: { state: 'hero', kind: 'selector' }, use: 'the host\u2019s access-mode trigger inside its permission slot' },
   { id: 'composer.dialog-trigger', value: DIALOG_TRIGGER_SELECTOR, probe: { state: 'hero', kind: 'selector' }, use: 'a host button that opens a dialog (the model and effort pickers); the context panel tells a figure\u2019s own trigger by it' },

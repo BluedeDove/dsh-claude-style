@@ -18,7 +18,14 @@ const HOST = {
 
 /** Type a prompt into the composer and send it, the way a reader does. */
 async function sendPrompt(page, text) {
-  await page.waitForSelector(HOST.composer, { timeout: 60000 })
+  await page.waitForSelector(HOST.composer, { state: 'attached', timeout: 60000 })
+  const native = page.locator('.dsh-claude-native-input:visible')
+  if (await native.count()) {
+    await native.fill(text)
+    await page.getByRole('button', {name: '发送消息', exact: true}).click()
+    await page.waitForSelector(HOST.userRow, {state: 'attached', timeout: 20000})
+    return
+  }
   // Focused by the element, not by a press at a point: on a fresh page the
   // sidebar is still settling, and a press aimed at the composer's centre
   // landed on the workspace control in a narrow window (the CI lane's `narrow`

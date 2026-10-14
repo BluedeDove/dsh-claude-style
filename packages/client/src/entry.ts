@@ -13,6 +13,7 @@ import { handleName, setFeatureRegistry } from './core/feature'
 import type { Feature, FeatureInstall } from './core/feature'
 import { FEATURES } from 'virtual:dsh-claude-style/features'
 import { BUILD_ID } from 'virtual:dsh-claude-style/generated'
+import { CHAT_FLOW_SELECTOR } from '@dsh-claude-style/contracts/dom'
 
 // At module scope on purpose: the sweep runs right after this factory
 // returns, so an `apply()` body would be too late. The head watch
@@ -191,6 +192,36 @@ export function apply(ctx: HostContext) {
       return
     }
     const run = arrived.get(feature.id)
+    if (run === undefined && feature.id === 'mobile') {
+      const needed = () => {
+        if (matchMedia('(max-width:720px), (any-pointer:coarse)').matches) awaitFeature(feature, feature.chunk!)
+      }
+      ui.mobile = {sync: needed, reposition: needed}
+      needed()
+      return
+    }
+    if (run === undefined && feature.id === 'ban') {
+      let ticket = 0
+      const proxy = {
+        isOpen: () => false,
+        close: () => { ticket++ },
+        open(at?: Date) {
+          const wanted = ++ticket
+          awaitFeature(feature, feature.chunk!)
+          loadFeatureChunk(feature.chunk!).then(() => {
+            if (!disposed && !yielded && wanted === ticket && ui.ban !== proxy) ui.ban?.open(at)
+          }, () => {})
+        },
+      }
+      ui.ban = proxy
+      return
+    }
+    if (run === undefined && (feature.id === 'turnNav' || feature.id === 'contextStats') && !document.querySelector(CHAT_FLOW_SELECTOR)) {
+      const needed = () => document.querySelector(CHAT_FLOW_SELECTOR) !== null
+        || (feature.id === 'contextStats' && document.querySelector('[data-dsh-claude-context-meter]') !== null)
+      ui[feature.id] = { sync() { if (needed()) awaitFeature(feature, feature.chunk!) } }
+      return
+    }
     if (run === undefined) awaitFeature(feature, feature.chunk)
     else install(feature.id, handleName(feature), () => run(ctx, ui))
   }
@@ -213,7 +244,7 @@ export function apply(ctx: HostContext) {
    * install: reported once, and the feature retires (D12).
    */
   function awaitFeature(feature: Feature, chunk: string) {
-    if (awaited.has(feature.id)) return
+    if (awaited.has(feature.id) || failed.has(feature.id) || disposed) return
     awaited.add(feature.id)
     loadFeatureChunk(chunk).then((run) => {
       awaited.delete(feature.id)

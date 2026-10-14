@@ -1,7 +1,8 @@
 {
-  "name": "dsh-claude-style",
+  "name": "dsh-claude-style-maintained",
+  "private": true,
   "description": "Claude Code Desktop theme for DeepSeek Harness (dsh) web GUI — visual & interaction overhaul",
-  "version": "0.13.2",
+  "version": "0.13.2-maintained.1",
   "type": "module",
   "main": "lib/host/index.js",
   "icon": "lib/claude-mark.svg",
@@ -31,7 +32,7 @@
   },
   "dsh": {
     "engines": {
-      "dsh": ">=0.1.7"
+      "dsh": ">=0.2.0-rc.2 <0.3.0"
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -51,6 +52,8 @@
     "docs/FEATURES.en.md",
     "docs/SETTINGS.md",
     "docs/SETTINGS.en.md",
+    "docs/MAINTENANCE.md",
+    "docs/MAINTENANCE.en.md",
     "docs/decisions",
     "CHANGELOG.md",
     "README.md",
@@ -75,11 +78,11 @@
   "author": "Nwflower",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Nwflower/dsh-claude-style.git"
+    "url": "git+https://github.com/BluedeDove/dsh-claude-style.git"
   },
-  "homepage": "https://github.com/Nwflower/dsh-claude-style#readme",
+  "homepage": "https://github.com/BluedeDove/dsh-claude-style#readme",
   "bugs": {
-    "url": "https://github.com/Nwflower/dsh-claude-style/issues"
+    "url": "https://github.com/BluedeDove/dsh-claude-style/issues"
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-client-ui-primitives": ">=0.1.5-rc.1",

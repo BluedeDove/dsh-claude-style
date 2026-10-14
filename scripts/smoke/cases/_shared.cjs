@@ -55,13 +55,13 @@ function commonChecks(r) {
     r.titlebarTabs === false, JSON.stringify(r.titlebarTabs))
   check('teardown registered with the host', r.teardownRegistered)
   check("the sheet carries this package's own module-system tags, so no sibling's bookkeeping can take it away",
-    r.sheetPlugin === 'dsh-claude-style' && r.sheetPluginCss === 'dsh-claude-style/client.css' && r.sheetClaimable === false,
+    r.sheetPlugin === 'dsh-claude-style-maintained' && r.sheetPluginCss === 'dsh-claude-style-maintained/client.css' && r.sheetClaimable === false,
     JSON.stringify({ plugin: r.sheetPlugin, css: r.sheetPluginCss, claimable: r.sheetClaimable }))
   check("a sibling's untagged sheet stays out of this package's bookkeeping, so no reload of this package removes it",
-    r.siblingSheetTag === 'dsh-claude-style/foreign-sheet' && r.siblingSheetClaimable === false && r.siblingSheetSurvives === true,
+    r.siblingSheetTag === 'dsh-claude-style-maintained/foreign-sheet' && r.siblingSheetClaimable === false && r.siblingSheetSurvives === true,
     JSON.stringify({ tag: r.siblingSheetTag, claimable: r.siblingSheetClaimable, survives: r.siblingSheetSurvives }))
   check("a sibling's sheet arriving after this bundle is parked before any package can claim it",
-    r.lateSheetTag === 'dsh-claude-style/foreign-sheet' && r.lateSheetClaimable === false,
+    r.lateSheetTag === 'dsh-claude-style-maintained/foreign-sheet' && r.lateSheetClaimable === false,
     JSON.stringify({ tag: r.lateSheetTag, claimable: r.lateSheetClaimable }))
   if (!r.teardownRegistered) return
   check('teardown leaves no skin node, marker, body attribute or stylesheet',

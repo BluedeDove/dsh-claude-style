@@ -46,6 +46,9 @@ export interface UsageModel {
 
 /** What the usage route answers: the window's days, the models, and where the figures came from. */
 export interface UsageReport {
+  /** Records the current host could not parse; totals cover the readable records. */
+  failed?: number
+  incomplete?: boolean
   /**
    * Which source answered: the fold over the session logs (`local`), the cost
    * ledger (`cost-meter`), or both when the fold covered dates the ledger does

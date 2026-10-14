@@ -55,7 +55,10 @@ export function chunkModulesModule(ids) {
   const imports = own.map((id, index) => `import * as shared${index} from ${JSON.stringify(source(id))}`)
   const entries = ids.map((id) => {
     const index = own.indexOf(id)
-    return `  ${JSON.stringify(id)}: ${index === -1 ? `require(${JSON.stringify(id)})` : `shared${index}`},`
+    // A deferred feature can be the only user of a host library (D1000).
+    // Resolve it when the chunk reads the table, through the host's own cache.
+    if (index === -1) return `  get ${JSON.stringify(id)}() { return require(${JSON.stringify(id)}) },`
+    return `  ${JSON.stringify(id)}: shared${index},`
   })
   const contents = `${imports.join('\n')}\nexport const CHUNK_MODULES = {\n${entries.join('\n')}\n}\n`
   return {

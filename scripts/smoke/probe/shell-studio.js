@@ -24,7 +24,7 @@
       var random = Math.random
       Math.random = function () { return 0.999 }
       document.body.appendChild(heroRoot)
-      await sleep(200)
+      await sleep(1000)
       Math.random = random
       r.panelRenders = {}
       // The Overview tab twice — all time, and the 7d pill picked — and the

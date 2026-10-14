@@ -92,7 +92,7 @@ function statsOverlayScenario({ check }) {
     script: 'greeting',
     prompt: 'hello there',
     patch: [
-      '- id: ui-skin-claude-style',
+      '- id: ui-skin-claude-maintained',
       '  config:',
       '    statsPosition: context',
     ],

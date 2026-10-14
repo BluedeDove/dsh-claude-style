@@ -48,6 +48,7 @@
 | [D41](D41-scroll-owner.md) | 聊天区的滚动位置只有一个写入者 | 已实施 |
 | [D42](D42-feature-manifest.md) | 功能清单 | 已实施 |
 | [D53](D53-usage-merge.md) | 用量两个来源按日期合并 | 已实施 |
+| [D1000](D1000-maintained.md) | 自维护分支的加载与手机布局 | 已实施 |
 
 ## 功能
 

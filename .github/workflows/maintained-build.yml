@@ -1,0 +1,31 @@
+name: Maintained build
+on:
+  push:
+    branches: [maintained]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: echo "CHROME_PATH=$(node -p \"require('playwright').chromium.executablePath()\")" >> "$GITHUB_ENV"
+      - run: npm run lint
+      - run: npm run features:check
+      - run: npm run docs:check
+      - run: npm run changelog:check
+      - run: npm run build
+      - run: npm test
+      - run: npm run smoke
+      - run: mkdir -p .debug/pack && npm pack --pack-destination .debug/pack
+      - uses: actions/upload-artifact@v6
+        with:
+          name: maintained-package
+          path: .debug/pack/*.tgz

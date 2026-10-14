@@ -14,7 +14,7 @@
  * buckets are disjoint. The one addition is the day dimension: a replaced sample
  * is subtracted from the day it was recorded on.
  */
-import { existsSync, readdirSync, statSync } from 'node:fs'
+import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { DshContext } from './dsh.js'
 import { BUCKET_KEYS, addBuckets, emptyBuckets } from './usage-ledger.js'
@@ -198,9 +198,9 @@ export function foldSession(events: UsageEvent[]): FoldedSession {
 }
 
 /** The newest generation of a session directory's log, with its fingerprint. */
-function newestLog(dir: string): { path: string, size: number, mtimeMs: number } | null {
+async function newestLog(dir: string): Promise<{ path: string, size: number, mtimeMs: number } | null> {
   let best: { name: string, version: number, compressed: boolean } | null = null
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
     if (!entry.isFile()) continue
     const match = SESSION_LOG.exec(entry.name)
     if (match === null) continue
@@ -213,26 +213,45 @@ function newestLog(dir: string): { path: string, size: number, mtimeMs: number }
   }
   if (best === null) return null
   const path = join(dir, best.name)
-  const stat = statSync(path)
-  return { path, size: stat.size, mtimeMs: stat.mtimeMs }
+  const info = await stat(path)
+  return { path, size: info.size, mtimeMs: info.mtimeMs }
 }
 
 /**
  * Every stored session: id, newest log, and that log's fingerprint. A harness
  * home that has never stored a session has no sessions root yet.
  */
-export function listSessionLogs(root: string): SessionLog[] {
+export async function listSessionLogs(root: string): Promise<SessionLog[]> {
   const out: SessionLog[] = []
-  if (!existsSync(root)) return out
-  for (const project of readdirSync(root, { withFileTypes: true })) {
+  let projects
+  try { projects = await readdir(root, { withFileTypes: true }) }
+  catch (error) {
+    // A new harness home has no session directory yet.
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return out
+    throw error
+  }
+  const directories: {id: string, path: string}[] = []
+  for (const project of projects) {
     if (!project.isDirectory()) continue
-    for (const session of readdirSync(join(root, project.name), { withFileTypes: true })) {
+    for (const session of await readdir(join(root, project.name), { withFileTypes: true })) {
       if (!session.isDirectory()) continue
-      const log = newestLog(join(root, project.name, session.name))
-      if (log === null) continue
-      out.push({ id: session.name, ...log })
+      directories.push({id: session.name, path: join(root, project.name, session.name)})
     }
   }
+  let cursor = 0
+  await Promise.all(Array.from({length: Math.min(8, directories.length)}, async () => {
+    while (cursor < directories.length) {
+      const directory = directories[cursor++]
+      try {
+        const log = await newestLog(directory.path)
+        if (log) out.push({id: directory.id, ...log})
+      } catch (error) {
+        // A concurrent archive or removal can make a listed directory vanish.
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      }
+    }
+  }))
+  out.sort((a, b) => a.path.localeCompare(b.path))
   return out
 }
 

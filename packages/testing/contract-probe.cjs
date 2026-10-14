@@ -82,7 +82,8 @@ function runProbes({ table, entries, frames = 0 }) {
     const root = probe.within === undefined ? document : document.querySelector(byId.get(probe.within).value)
     if (probe.kind === 'selector') {
       const matches = root === null ? 0 : root.querySelectorAll(entry.value).length
-      return { ok: matches >= (probe.min ?? 1), observed: `${matches} match${matches === 1 ? '' : 'es'}` }
+      const alternative = probe.alternative === undefined ? 0 : document.querySelectorAll(byId.get(probe.alternative).value).length
+      return { ok: matches >= (probe.min ?? 1) || alternative > 0, observed: `${matches} match${matches === 1 ? '' : 'es'}${alternative ? `; ${probe.alternative}: ${alternative}` : ''}` }
     }
     if (probe.kind === 'attribute') {
       const matches = document.querySelectorAll(`[${entry.value}]`).length

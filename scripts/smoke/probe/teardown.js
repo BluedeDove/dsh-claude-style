@@ -28,6 +28,7 @@
     r.topUpFill = topUpCS ? topUpCS.backgroundColor : null
     var banRow = document.querySelector('[data-dsh-claude-ban-row]')
     if (banRow) banRow.click()
+    if (banRow) await sleep(100)
     var toast = document.querySelector('.dsh-claude-ban-toast-text')
     r.banToast = toast ? toast.textContent : null
     var dismiss = document.querySelector('.dsh-claude-ban [data-dsh-ban-dismiss]')

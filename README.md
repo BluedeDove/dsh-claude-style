@@ -1,3 +1,5 @@
+> 自维护版本：开发与手动升级使用 `maintained` 分支。内置手机界面替代 `dsh-web-mobile` 与 `dsh-mobile-flow`；启用前关闭两个旧插件。已验证 DSH 0.2.0-rc.2，未来版本需先测试。[维护与撤回说明](docs/MAINTENANCE.md)
+
 <div align="center">
 
 # DSH Claude Style

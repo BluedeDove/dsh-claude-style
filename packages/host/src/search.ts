@@ -113,6 +113,7 @@ interface CachedSession {
 import type { DshContext } from './dsh.ts'
 import { cachePath, readJsonDocument, writeJsonDocument } from './cache-file.js'
 import { readEvents } from './session-events.js'
+import { setImmediate as yieldLoop } from 'node:timers/promises'
 
 /**
  * The query service's own text rule (dsh-session-query `compileSessionTextFilter`):
@@ -198,6 +199,7 @@ export function createSessionSearch(ctx: DshContext) {
   /** The stored sessions' id → revision, and when it was last listed. */
   let stored: Map<string, string> | null = null
   let listedAt = 0
+  let disposed = false
 
   function cacheFile(sessionId: string) {
     return cachePath(ctx, 'search', `${sessionId}.json`)
@@ -244,7 +246,15 @@ export function createSessionSearch(ctx: DshContext) {
 
   /** Fold one session's complete log into a corpus. */
   async function rebuild(sessionId: string, revision: string) {
-    const events = await readEvents<LogEvent>(ctx, sessionId, 'content search')
+    let events: LogEvent[] | null
+    try { events = await readEvents<LogEvent>(ctx, sessionId, 'content search') }
+    catch (error) {
+      // Old descriptor failures belong to one record; retain its existing
+      // index, report the failure, and continue the other sessions (D1000).
+      ctx.logger?.warn?.(`dsh-claude-style: historical search read failed: ${String(error)}`)
+      return
+    }
+    if (disposed) return
     const messages = events === null ? [] : messagesOf(events)
     // The next seq to read, off the log itself: a fold that stopped at the last
     // message would re-read the events after it on every live tail read.
@@ -291,7 +301,10 @@ export function createSessionSearch(ctx: DshContext) {
       if (!wanted.has(id)) forget(id)
     }
     const stale: string[] = []
+    let checked = 0
     for (const [id, want] of wanted) {
+      if (++checked % 32 === 0) await yieldLoop()
+      if (disposed) return
       const entry = cache.get(id) ?? readCached(id)
       if (entry === null) {
         stale.push(id)
@@ -318,6 +331,7 @@ export function createSessionSearch(ctx: DshContext) {
     let next = 0
     const worker = async () => {
       while (next < stale.length) {
+        if (disposed) return
         const id = stale[next++]
         const want = wanted.get(id)
         if (want !== undefined) await rebuild(id, want.revision)
@@ -328,15 +342,13 @@ export function createSessionSearch(ctx: DshContext) {
     await Promise.all(workers)
   }
 
-  function catchUp(store: boolean) {
-    // A store listing supersedes a tail-only pass already in flight; the other
-    // way round, a search waits for the pass that is running.
-    if (refreshing !== null && (refreshingStore || !store)) return refreshing
+  function catchUp(store: boolean): Promise<void> {
+    // A requested listing waits for the live-tail pass, then runs once. All
+    // concurrent searches share whichever pass already supplies their data.
+    if (refreshing !== null) return store && !refreshingStore ? refreshing.then(() => catchUp(true)) : refreshing
     refreshingStore = store
     const pass = refresh(store)
-    // Only the pass that is still the current one clears the shared state: a
-    // store listing replaces a tail-only pass, and the older pass's own end
-    // must not open the door for a third one to run beside the newer.
+    // A chained caller can start a newer pass after this one completes.
     const done = pass.finally(() => {
       if (refreshing === done) {
         refreshing = null
@@ -354,7 +366,7 @@ export function createSessionSearch(ctx: DshContext) {
   async function search(text: string) {
     // Nothing listed yet means no corpus at all: the first search reads the
     // store itself; later ones read the running sessions' new tails only.
-    await catchUp(stored === null)
+    await catchUp(stored === null || listedAt === 0)
     const query = text.trim()
     const parts = query.split(/\s+/u)
     const single = parts.length === 1 ? parts[0].toLowerCase() : ''
@@ -378,5 +390,8 @@ export function createSessionSearch(ctx: DshContext) {
     return { sessions: hits.slice(0, SESSION_LIMIT), scanned: cache.size }
   }
 
-  return { search, warm: () => catchUp(true) }
+  return { search, warm: () => catchUp(true),
+    begin() { if (Date.now() - listedAt >= LIST_INTERVAL_MS) listedAt = 0 },
+    dispose() { disposed = true; cache.clear(); lower.clear(); writtenAt.clear() },
+  }
 }

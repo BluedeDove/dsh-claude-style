@@ -4,6 +4,24 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 
 ## [Unreleased]
 
+[中文](#cn-unreleased) | [English](#en-unreleased)
+
+<h3 id="cn-unreleased">新增功能</h3>
+
+- 新增内置手机界面：抽屉侧栏、紧凑顶栏、可展开工具与独立统计区域；原生文本框保留中文组合输入、草稿、命令和附件，启用时关闭两个旧手机插件。
+
+### 体验优化
+
+- 迁入本地加载优化：对话分页与可恢复侧栏范围、按页面刷新、首页可见时统计、正文搜索按需索引、异步目录扫描与缓存；手机模块仅在窄屏或触屏加载。
+
+<h3 id="en-unreleased">New Features</h3>
+
+- Built-in phone interface adds a drawer sidebar, compact header, expandable tools and separate statistics; native input preserves composition, drafts, commands and attachments. Disable the two previous phone plugins when enabling it.
+
+### Improvements
+
+- Local loading changes add bounded conversation pages, reversible sidebar ranges, page-specific refreshes, visible dashboard polling, demand-driven text indexing, asynchronous log discovery and caches. Phone code loads only on narrow or touch screens.
+
 ## [0.13.2] - 2026-10-11
 
 [中文](#cn-0.13.2) | [English](#en-0.13.2)

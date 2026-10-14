@@ -19,6 +19,7 @@
  * ledger's, and the fold answers for the days it does not cover (D53).
  */
 import { join, resolve } from 'node:path'
+import { setImmediate as yieldLoop } from 'node:timers/promises'
 import type { DshContext } from './dsh.js'
 import { harnessPath } from './harness-home.js'
 import { readCache, writeCache } from './usage-cache.js'
@@ -70,14 +71,17 @@ export function createUsage(ctx: DshContext) {
   let state: UsageState | null = null
   let pending: Promise<UsageSummary | null> | null = null
   let disposed = false
+  let memoryCache: Map<string, CacheSession> | null = null
 
   /** Fold every session whose log changed since the cache was written. */
   async function computeLocal(logs: SessionLog[], ledgerDays: ReadonlyMap<string, DayBuckets> | null) {
-    const cache = readCache(ctx)
+    const cache = memoryCache ?? readCache(ctx)
     const sessions = new Map<string, CacheSession>()
     let read = 0
     let failed = 0
     for (const log of logs) {
+      if (disposed) return null
+      if (sessions.size % 8 === 0) await yieldLoop()
       const cached = cache.get(log.id)
       if (cached !== undefined && cached.size === log.size && cached.mtimeMs === log.mtimeMs) {
         sessions.set(log.id, cached)
@@ -86,7 +90,16 @@ export function createUsage(ctx: DshContext) {
       // Each changed log is read by id. That read resolves the session through
       // the host's listing-free observation (D53), so a pass costs one `stat`
       // per log read and never walks the stored corpus.
-      const events = await readEvents<UsageEvent>(ctx, log.id, 'the usage roll-up')
+      let events: UsageEvent[] | null
+      try { events = await readEvents<UsageEvent>(ctx, log.id, 'the usage roll-up') }
+      catch (error) {
+        // Historical readers can reject an old descriptor; keep the previous
+        // fold and explicitly report the incomplete total (D1000).
+        failed += 1
+        if (cached !== undefined) sessions.set(log.id, cached)
+        ctx.logger?.warn?.(`dsh-claude-style: historical usage read failed: ${String(error)}`)
+        continue
+      }
       if (events === null) {
         // The reader refused (no `sessionQuery` service, or a log it cannot
         // parse). Leave the session out of the cache so the next pass retries it
@@ -99,7 +112,8 @@ export function createUsage(ctx: DshContext) {
       sessions.set(log.id, { size: log.size, mtimeMs: log.mtimeMs, days: folded.days, hours: folded.hours })
       read += 1
     }
-    writeCache(ctx, sessions)
+    if (read > 0 || sessions.size !== cache.size) writeCache(ctx, sessions)
+    memoryCache = sessions
     const merge = mergeLedgerFold(ledgerDays, sessions, logs)
     // The source names what answered: with no ledger at all the fold is the
     // whole account, and saying `cost-meter+local` there would credit a plugin
@@ -117,16 +131,16 @@ export function createUsage(ctx: DshContext) {
     if (sessions.size === 0 && failed > 0) {
       return { ...summary, unavailable: true, reason: 'session-query-unavailable' }
     }
-    return { ...summary, read, failed, sessions: logs.length }
+    return { ...summary, read, failed, incomplete: failed > 0, sessions: logs.length }
   }
 
   /**
    * @param publish - receives an answer that is already worth serving while the
    *   rest of the pass is still running.
    */
-  async function compute(publish: (partial: UsageSummary) => void): Promise<UsageSummary> {
+  async function compute(publish: (partial: UsageSummary) => void): Promise<UsageSummary | null> {
     const root = resolve(join(home(), 'sessions'))
-    const logs = listSessionLogs(root)
+    const logs = await listSessionLogs(root)
     const ledgerDays = readLedger(home())
 
     if (logs.length === 0) return summarize(new Map(), 0, LOCAL_SOURCE, NO_HOURS)
@@ -176,6 +190,7 @@ export function createUsage(ctx: DshContext) {
     refresh,
     dispose() {
       disposed = true
+      memoryCache = null
     },
   }
 }

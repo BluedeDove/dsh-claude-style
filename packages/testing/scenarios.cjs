@@ -25,6 +25,7 @@ const { sidebarRailScenario } = require('./sidebar-rail.cjs')
 const { remoteSettingsScenario } = require('./remote-settings.cjs')
 const { CANVAS } = require('../../scripts/shoot.cjs')
 const { sanitizePage } = require('../../scripts/shared/privacy.cjs')
+const { mobileScenario } = require('./mobile.cjs')
 
 /**
  * How far behind the tail the scroller may lag while the reader follows it. The
@@ -83,64 +84,7 @@ const SCENARIOS = {
       ]
     },
   },
-  /**
-   * The composer at a phone's width: the bottom line carries the tier, the
-   * model, the effort level and the context ring on one row, and at 390px the
-   * row keeps them by dropping what it cannot show — the tier's arrow, the
-   * labels' tails and the ring's number — rather than running past the card.
-   */
-  narrow: {
-    script: 'greeting',
-    prompt: 'hello there',
-    viewport: { width: 390, height: 844 },
-    async assert({ page, session }) {
-      const narrow = await page.evaluate(() => {
-        const read = (selector) => document.querySelector(selector)
-        const box = (el) => {
-          if (el === null) return null
-          const rect = el.getBoundingClientRect()
-          return { left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) }
-        }
-        const shown = (el) => el !== null && getComputedStyle(el).display !== 'none'
-        const cap = (el) => (el === null ? null : getComputedStyle(el).maxWidth)
-        const perm = read('.dsh-claude-perm-btn')
-        const permLabel = read('.dsh-claude-perm-label')
-        const model = read('.dsh-claude-model-btn')
-        const modelLabel = read('.dsh-claude-model-btn-label')
-        const meter = read('[data-dsh-claude-context-meter]')
-        return {
-          width: window.innerWidth,
-          card: box(read('[data-composer-card]')),
-          perm: box(perm),
-          permMax: cap(perm),
-          permEllipsis: permLabel === null ? null : getComputedStyle(permLabel).textOverflow,
-          chevron: shown(read('.dsh-claude-perm-chevron')),
-          model: box(model),
-          modelMax: cap(model),
-          modelEllipsis: modelLabel === null ? null : getComputedStyle(modelLabel).textOverflow,
-          effort: box(read('.dsh-claude-effort-btn')),
-          meter: box(meter),
-          ring: shown(meter === null ? null : meter.querySelector('svg')),
-          number: shown(meter === null ? null : meter.querySelector('button > span')),
-        }
-      })
-      const inside = (inner, outer) => inner === null || outer === null || (inner.left >= outer.left && inner.right <= outer.right)
-      const fits = inside(narrow.perm, narrow.card) && inside(narrow.model, narrow.card) && inside(narrow.meter, narrow.card) &&
-        (narrow.effort === null || narrow.meter.left >= narrow.effort.right)
-      return [
-        check('页面是手机的宽度', narrow.width === 390, `innerWidth=${narrow.width}`),
-        check('权限选择器收起了下三角', narrow.chevron === false, `chevron=${narrow.chevron}`),
-        check('权限与模型选择器按窄屏上限截断', narrow.permMax === '132px' && narrow.modelMax === '112px' &&
-          narrow.permEllipsis === 'ellipsis' && narrow.modelEllipsis === 'ellipsis',
-          JSON.stringify({ permMax: narrow.permMax, modelMax: narrow.modelMax, perm: narrow.permEllipsis, model: narrow.modelEllipsis })),
-        check('上下文只留圆环，数字不再显示', narrow.ring === true && narrow.number === false,
-          JSON.stringify({ ring: narrow.ring, number: narrow.number })),
-        check('控件都留在输入卡片里，圆环也不与旁边的控件重叠', fits,
-          JSON.stringify({ card: narrow.card, perm: narrow.perm, model: narrow.model, effort: narrow.effort, meter: narrow.meter })),
-        check('控制台没有异常', session.problems.length === 0, session.problems.slice(0, 3).join(' | ')),
-      ]
-    },
-  },
+  narrow: mobileScenario,
   /** A scripted tool call: its row, its call id, and the answer that follows. */
   tool: {
     script: 'inspect',

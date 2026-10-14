@@ -1,3 +1,5 @@
+> Maintained fork: use the `maintained` branch for development and manual upgrades. Built-in phone UI replaces `dsh-web-mobile` and `dsh-mobile-flow`; disable both old plugins before activation. Verified with DSH 0.2.0-rc.2; test future versions first. [Maintenance and rollback](docs/MAINTENANCE.en.md)
+
 <div align="center">
 
 # DSH Claude Style

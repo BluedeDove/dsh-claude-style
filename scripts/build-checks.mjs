@@ -159,6 +159,7 @@ export function checkContracts(manifests) {
     if (!PROBE_STATES.has(probe.state)) throw new Error(`build: packages/contracts/src/table.ts entry "${entry.id}" has probe state "${probe.state}"`)
     if (!PROBE_KINDS.has(probe.kind)) throw new Error(`build: packages/contracts/src/table.ts entry "${entry.id}" has probe kind "${probe.kind}"`)
     if (probe.within !== undefined && !listed.has(probe.within)) throw new Error(`build: packages/contracts/src/table.ts entry "${entry.id}" is checked within "${probe.within}", which the table does not list`)
+    if (probe.alternative !== undefined && !listed.has(probe.alternative)) throw new Error(`build: contract "${entry.id}" names unknown alternative "${probe.alternative}"`)
   }
   const values = new Set(table.map((entry) => entry.value))
   for (const [name, value] of Object.entries(literals)) {

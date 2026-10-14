@@ -64,6 +64,19 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   const usage = createHomeUsage(ctx)
   const overview = createHomeOverview()
   const models = createHomeModels()
+  let catalogReady = typeof ctx.inject !== 'function'
+  const readyFiber = ctx.inject?.(['sessions'], scope => {
+    const list = scope.get('sessions')?.list
+    if (!list) {catalogReady = true; ui.schedule?.(); return}
+    const update = () => {
+      const next = list.getSnapshot().phase === 'ready'
+      if (next === catalogReady) return
+      catalogReady = next
+      ui.schedule?.()
+    }
+    update()
+    scope.effect(() => list.subscribe(update), 'home: catalog readiness')
+  })
 
   /**
    * Whether the page currently shows the new-conversation hero.
@@ -77,7 +90,12 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
    * `data-phase` of their own.
    */
   function heroPhase() {
-    return document.querySelector(`[class*="_root"][${PHASE_ATTRIBUTE}="hero"]`) !== null
+    // Restoring a selected conversation starts with a temporary hero while
+    // its metadata is still pending. That is not a request for a dashboard.
+    if (!catalogReady) return false
+    // Kept or hidden pages are still mounted by the host. Their DOM presence
+    // alone must not start statistics for the page currently being read.
+    return Array.from(document.querySelectorAll(`[class*="_root"][${PHASE_ATTRIBUTE}="hero"]`)).some(root => root.getClientRects().length > 0)
   }
 
   /**
@@ -99,7 +117,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     if (next === HOME_LAYOUT_STUDIO) document.body.setAttribute(HOME_LAYOUT_ATTR, HOME_LAYOUT_STUDIO)
     else document.body.removeAttribute(HOME_LAYOUT_ATTR)
     writeHeroAttr(lastHero)
-    if (next === HOME_LAYOUT_STUDIO) usage.load(false)
+    usage.setActive(next === HOME_LAYOUT_STUDIO && lastHero)
     usage.notify()
   }
 
@@ -178,6 +196,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
           ),
         ),
       ),
+      (state.value?.failed ?? 0) > 0 ? React.createElement('p', {role:'status',className:'dsh-claude-home-incomplete'}, `有 ${state.value?.failed} 个历史记录无法被当前 dsh 解析，以下统计为已解析部分。`) : null,
       tab === 'models'
         ? React.createElement(models.component, { data })
         : overview.view(data),
@@ -246,6 +265,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     // it — so the flip has to reach the component, and the stylesheet's
     // studio rules follow it through the document mark.
     const hero = heroPhase()
+    usage.setActive(next === HOME_LAYOUT_STUDIO && hero)
     writeHeroAttr(hero)
     if (hero !== lastHero) {
       lastHero = hero
@@ -253,7 +273,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
       usage.notify()
     }
     syncColdSeat()
-    if (next === HOME_LAYOUT_STUDIO) {
+    if (next === HOME_LAYOUT_STUDIO && hero) {
       usage.load(false)
       usage.loadList()
     }
@@ -263,10 +283,14 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
 
   registerPanel()
   setLayout(readPrefs().homeLayout)
+  const onVisibility = () => usage.setActive(layout === HOME_LAYOUT_STUDIO && heroPhase())
+  document.addEventListener('visibilitychange', onVisibility)
 
   return () => {
     unmountColdSeat()
     usage.stop()
+    readyFiber?.dispose()
+    document.removeEventListener('visibilitychange', onVisibility)
     document.body.removeAttribute(HOME_LAYOUT_ATTR)
     document.body.removeAttribute(HOME_HERO_ATTR)
     if (slotsFiber !== null) {

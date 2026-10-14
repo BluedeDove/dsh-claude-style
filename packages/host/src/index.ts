@@ -40,7 +40,7 @@ import { registerRoutes } from './routes.js'
 import type { DshContext, DshScope } from './dsh.ts'
 import { registerSettings } from './settings.js'
 
-export const name = 'dsh-claude-style'
+export const name = 'dsh-claude-style-maintained'
 export { Config } from './settings.js'
 
 /**

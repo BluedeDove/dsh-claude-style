@@ -59,6 +59,9 @@ interface CaretLayer {
  *     composer seat, null for anything else.
  */
 export function caretSurfaceOf(element: Element) {
+  // The native mobile field keeps the platform caret and an unchanged DOM
+  // while an IME owns the composition (D1000).
+  if (element instanceof HTMLTextAreaElement && element.closest('[data-dsh-claude-native-input]')) return null
   if (element.matches(COMPOSER_INPUT_SELECTOR)) return 'rich'
   if (element instanceof HTMLTextAreaElement && element.matches(COMPOSER_TEXTAREA_SELECTOR)) {
     return element.disabled || element.readOnly ? null : 'plain'

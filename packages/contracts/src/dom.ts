@@ -71,6 +71,10 @@ export const COMPOSER_SELECTOR = '[data-composer-seat]'
 export const COMPOSER_INPUT_SELECTOR = '[data-composer-input]'
 /** The card the input sits in; the send flight lifts a copy of the whole card. */
 export const COMPOSER_CARD_SELECTOR = '[data-composer-card]'
+export const COMPOSER_TOOLS_SELECTOR = '[class*="_tools"]'
+export const COMPOSER_TRAILING_SELECTOR = '[class*="_trailing"]'
+export const COMPOSER_DOCK_SELECTOR = '[class*="_dock"]'
+export const COMPOSER_MODES_SELECTOR = '[class*="_modes"]'
 /** The draft's own scroll area inside that card. */
 export const COMPOSER_SCROLL_SELECTOR = '[data-input-scroll]'
 /** The echo bubble the host mounts the moment a submission goes through. */
@@ -198,6 +202,13 @@ export const FOOT_AREA_SELECTOR = '[class*="footArea"]'
  * this slot.
  */
 export const SIDEBAR_SEARCH_SLOT_SELECTOR = '[data-slot="sidebar"] [class*="_searchSlot"]'
+/** The sidebar's own root, independent of the conversation flow. */
+export const SIDEBAR_SLOT_SELECTOR = '[data-slot="sidebar"]'
+export const SIDEBAR_ROW_SELECTOR = '[data-row-key]'
+export const SIDEBAR_LABEL_SELECTOR = '[class*="sectionLabel"]'
+/** The shell frame, resolved upwards from the sidebar slot. */
+export const SHELL_FRAME_SELECTOR = '[class*="_frame"]'
+export const SHELL_RIGHTBAR_SELECTOR = '[class*="_rightbarCol"]'
 /** The host's own composer is replaced by a panel of its own choice; this is that panel's seat. */
 export const CHAIN_OVERLAY_FALLBACK_ATTRIBUTE = 'data-chain-overlay-fallback'
 /** The host's own open menus and modal dialogs: the foreground the skin must not walk over. */
@@ -230,6 +241,8 @@ export const HEADER_TITLE_ROW_SELECTOR = '[class*="titleRow"]'
  * where the title ends).
  */
 export const HEADER_TITLE_SELECTOR = '[class*="_crumbs"]'
+export const HEADER_CLUSTER_SELECTOR = '[class*="_titleCluster"]'
+export const HEADER_ACTIONS_SELECTOR = '[class*="_headerActions"]'
 /** The header's utilities cluster: the workspace opener, the overflow menu, the bottom-panel toggle. */
 export const HEADER_UTILITIES_SELECTOR = '[class*="headerUtilities"]'
 /** The corner seat beside the utilities, carrying the right-sidebar toggle. */

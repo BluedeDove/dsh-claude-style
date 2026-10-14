@@ -23,8 +23,8 @@ export const STYLE_ID = 'dsh-claude-style-style'
  * configuration is a `plugins.bundle.config` entry keyed by the bundle's
  * package name, which is what makes it render on this plugin's page.
  */
-export const SETTINGS_ENTRY_FALLBACK = 'ui-skin-claude-style'
-export const PACKAGE_NAME = 'dsh-claude-style'
+export const SETTINGS_ENTRY_FALLBACK = 'ui-skin-claude-maintained'
+export const PACKAGE_NAME = 'dsh-claude-style-maintained'
 /**
  * The skin stylesheet's own key in the client module system's bookkeeping:
  * the sheet is mounted tagged `data-plugin="<PACKAGE_NAME>"` and
@@ -45,7 +45,7 @@ export const SETTINGS_SECTION_SLOT = 'settings.section'
  * The plugin's own repository. The settings page's heading links to it, and
  * the address is read from here rather than written into the component.
  */
-export const REPOSITORY_URL = 'https://github.com/Nwflower/dsh-claude-style'
+export const REPOSITORY_URL = 'https://github.com/BluedeDove/dsh-claude-style'
 
 /**
  * Preferences, persisted in the profile entry's settings namespace (the

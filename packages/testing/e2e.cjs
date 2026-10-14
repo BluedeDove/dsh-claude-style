@@ -33,6 +33,7 @@ const { SCENARIOS } = require('./scenarios.cjs')
 const { sendPrompt, waitForTurn } = require('./prompt.cjs')
 const { startMockLlm } = require('./mock-llm.cjs')
 const { loadModule } = require('../../scripts/shared/ts-module.cjs')
+const { sanitizePage } = require('../../scripts/shared/privacy.cjs')
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const DEFAULT_OUT = path.join(ROOT, '.debug', 'e2e', 'out')
@@ -53,6 +54,7 @@ const SCENARIO_DEADLINE_MS = Number(process.env.DSH_E2E_DEADLINE_MS ?? '') || 3 
 async function captureFailure(session, out, name) {
   const { page } = session
   const file = path.join(out, `${name}-failure.png`)
+  await sanitizePage(expression => page.evaluate(expression))
   await page.screenshot({ path: file }).catch(() => {})
   const state = await page.evaluate(() => {
     const input = document.querySelector('[data-composer-input]')

@@ -4,6 +4,7 @@ import { loadPrefs, refreshMotionAttribute, subscribePrefs } from './prefs'
 import type { HostContext } from './host'
 import { observeSize, subscribeMutations } from './bus'
 import { requestFrame } from './frame'
+import { CHAT_FLOW_SELECTOR, SIDEBAR_SLOT_SELECTOR, PHASE_ATTRIBUTE, CONVERSATION_SESSION_ATTRIBUTE } from '@dsh-claude-style/contracts/dom'
 import { closestFrom } from '../shared/dom'
 import type { FooterHandle } from '../features/account/account-footer'
 import type { BanHandle } from '../features/ban-screen/ban-screen'
@@ -78,6 +79,8 @@ export interface Handles {
   viewTabs: FeatureHandle
   headerBand: FeatureHandle
   settingsNav: FeatureHandle
+  history: FeatureHandle
+  mobile: FeatureHandle
 }
 
 export type HandleName = keyof Handles
@@ -116,6 +119,10 @@ export function installScheduler(ctx: HostContext, ui: Ui, features: HandleName[
   let cancelPass: (() => void) | null = null
   /** Set by the teardown: no pass may be scheduled, or run, after it. */
   let stopped = false
+  // DOM changes carry a domain. Explicit feature/service/preference requests
+  // keep a full pass, so navigation and settings changes cannot miss a hook.
+  let fullPass = false
+  const dirty = new Set<HandleName>()
 
   /** The handle a feature registered under `name`, while that feature is installed. */
   function handleOf(name: HandleName): FeatureHandle | undefined {
@@ -266,7 +273,9 @@ export function installScheduler(ctx: HostContext, ui: Ui, features: HandleName[
   }
 
   /** Chat streaming mutates the tree constantly; coalesce to one pass a frame. */
-  function schedule() {
+  function schedule(names?: Set<HandleName>) {
+    if (names === undefined) fullPass = true
+    else for (const name of names) dirty.add(name)
     if (scheduled || stopped) return
     scheduled = true
     // The pass reads and writes feature by feature, so it runs in the write
@@ -276,8 +285,12 @@ export function installScheduler(ctx: HostContext, ui: Ui, features: HandleName[
         scheduled = false
         cancelPass = null
         if (stopped) return
-        for (const name of features) runSync(name)
-        const currentCard = findComposerCard()
+        const runAll = fullPass
+        const pending = new Set(dirty)
+        fullPass = false
+        dirty.clear()
+        for (const name of features) if (runAll || pending.has(name)) runSync(name)
+        const currentCard = runAll || pending.has('composer') ? findComposerCard() : observedCard
         if (currentCard !== observedCard) {
           if (stopCardSize !== null) stopCardSize()
           stopCardSize = null
@@ -297,12 +310,29 @@ export function installScheduler(ctx: HostContext, ui: Ui, features: HandleName[
     childList: true,
     characterData: true,
     subtree: true,
-    // Only the two attributes a paint depends on: the shipped trigger carries
-    // the current preset in its aria-label, the conversation tabs the view in
-    // aria-selected.
-    attributeFilter: ['aria-label', 'aria-selected'],
+    // Attribute changes also cover route and session restoration, which must
+    // wake a complete pass even when no child is added.
+    attributeFilter: ['aria-label', 'aria-selected', PHASE_ATTRIBUTE, CONVERSATION_SESSION_ATTRIBUTE],
     skipQuiet: true,
-  }, schedule)
+  }, records => {
+    const changed = new Set<HandleName>()
+    for (const record of records) {
+      const target = record.target instanceof Element ? record.target : record.target.parentElement
+      // Only stable host-owned subtrees are narrowed. A route transition,
+      // detached target or unknown surface gets the original full pass.
+      if (target?.isConnected && target.closest(CHAT_FLOW_SELECTOR)) {
+        for (const name of ['chatFollow','chatFold','chatWait','chatReveal','chatFiles','contextStats','turnNav','mascot'] as HandleName[]) changed.add(name)
+      } else if (target?.isConnected && target.closest(SIDEBAR_SLOT_SELECTOR)) {
+        for (const name of ['workspace','search','footer'] as HandleName[]) changed.add(name)
+      } else if (target?.isConnected && target.closest('[data-dsh-claude-settings-scroller]')) {
+        changed.add('settingsNav')
+      } else {
+        schedule()
+        return
+      }
+    }
+    if (changed.size) schedule(changed)
+  })
   schedule()
 
   // Copy that follows the clock (the hero greeting rolls over on the hour) has

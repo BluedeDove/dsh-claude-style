@@ -71,6 +71,8 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   let sessions: HostSessionsService | null = null
   let unwatch: (() => void) | null = null
   let disposed = false
+  const PAGE_SIZE = 60
+  let shown = PAGE_SIZE
 
   function service(name: string): HostValue {
     return ctx.get(name)
@@ -176,7 +178,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     const key = items === null ? null : items.map(item => `${item.id}\n${item.title}\n${item.at}`).join('\n')
     if (key === renderedKey) return
     renderedKey = key
-    renderList()
+    if (view === 'archived') renderList()
   }
 
   /**
@@ -316,7 +318,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   }
 
   function renderList() {
-    if (listHost === null) return
+    if (listHost === null || view !== 'archived') return
     // The actions live in React roots; drop them before the rows go, or every
     // rebuild would leave a tree behind.
     for (let r = 0; r < actionRoots.length; r++) {
@@ -332,7 +334,15 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
       listHost.appendChild(buildElement('div', 'dsh-claude-archive-status', copyLabel('archiveEmpty', 'No archived conversations')))
       return
     }
-    for (let i = 0; i < items.length; i++) listHost.appendChild(buildArchivedRow(items[i]))
+    const fragment = document.createDocumentFragment()
+    for (let i = 0; i < Math.min(shown, items.length); i++) fragment.appendChild(buildArchivedRow(items[i]))
+    if (shown < items.length) {
+      const more = buildElement('button', 'dsh-claude-archive-more', `继续显示（${Math.min(shown,items.length)} / ${items.length}）`)
+      more.type = 'button'
+      more.addEventListener('click', () => { shown += PAGE_SIZE; renderList() })
+      fragment.appendChild(more)
+    }
+    listHost.appendChild(fragment)
   }
 
   function buildControl() {
@@ -359,6 +369,7 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     if (next !== 'active' && next !== 'archived') return
     if (next === view) return
     view = next
+    if (view === 'archived') renderList()
     sync()
   }
 

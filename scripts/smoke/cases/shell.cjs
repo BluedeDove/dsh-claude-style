@@ -481,7 +481,7 @@ module.exports = {
     const link = settings.link || {}
     const mark = settings.mark || {}
     check('the heading carries the plugin\'s repository link, opening in a new tab with an accessible name',
-      link.href === 'https://github.com/Nwflower/dsh-claude-style' && link.target === '_blank' &&
+      link.href === 'https://github.com/BluedeDove/dsh-claude-style' && link.target === '_blank' &&
         (link.rel || '').includes('noopener') && typeof link.label === 'string' && link.label.length > 0,
       JSON.stringify(link))
     check('the link\'s mark is the inlined asset, painted as a mask in the quiet ink',
