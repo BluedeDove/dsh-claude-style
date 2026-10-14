@@ -18,6 +18,26 @@
 
 </div>
 
+## What this fork changes
+
+This repository is a fork of [Nwflower/dsh-claude-style](https://github.com/Nwflower/dsh-claude-style), maintained by [BluedeDove](https://github.com/BluedeDove) for personal use. Upstream is the source of truth for this theme: the changes below reflect what this machine needs, not upstream's roadmap, and they do not carry the original author's endorsement.
+
+The baseline is upstream source commit `c97673a` on `master` (the 0.13.2 sources). The `master` branch tracks upstream and every change lives on `maintained`; [docs/MAINTENANCE.en.md](docs/MAINTENANCE.en.md) covers manual upgrades and rollback.
+
+| Change | Details | Commit |
+| --- | --- | --- |
+| Phone UI and loading optimizations merged in | The loading optimizations that used to come from `dsh-web-mobile` now live in the skin, and the phone UI is a feature of the skin itself (`packages/client/src/features/mobile/`: shell, native composer, styles, manifest). The host half was adjusted for home data, session search and usage folding, and `packages/testing/mobile.cjs` adds a smoke scenario. `dsh-web-mobile` and `dsh-mobile-flow` are no longer needed: disable both before enabling this skin. | `2205ee2` |
+| Leaner phone layout, controls in floating panels | The phone keeps one header row and a compact composer; model, stats and target controls move into Tools, with a hint dot when a target is set. More and Tools open in mutually exclusive floating panels that close on an outside click, the close button or Escape, and they never grow the header or the composer. The decorative mascot is hidden on the phone conversation page. The desktop composer gets multi-line space, its settings row wraps with the available width, and context stats stand alone. | `daa6289` |
+| Maintained build fix | The managed Chromium now gets `--no-sandbox`; before this, the maintained build failed at the smoke stage twice in a row. | `dcd5192` |
+
+The package is renamed `dsh-claude-style-maintained` and marked `private`, so it never claims upstream's name on npm: install packages come from this repository's [Releases](https://github.com/BluedeDove/dsh-claude-style/releases) only. The tarball is produced by `npm pack`, so upstream's packaging exclusions apply — verified: it carries no Anthropic proprietary fonts, and ships the JetBrains Mono, Inter and Noto Serif OFL fonts together with their license texts. The settings entry id is pinned to `ui-skin-claude-maintained`, so upgrades replace the module path and keep the saved configuration. A new `Maintained build` workflow runs lint, the feature, docs and changelog checks, build, tests and smoke on every push to `maintained`.
+
+`LICENSE` and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) keep upstream's attributions unchanged. The native phone composer follows the slot and commit-point design of [imroc/dsh-mobile-flow](https://github.com/imroc/dsh-mobile-flow) v0.8.0, credited with its MIT license in the third-party notices.
+
+### Bringing changes back upstream
+
+Upstream has recently merged external contributions (#42, #43, #45, #50), but `CONTRIBUTING.md` asks for an issue with the rationale before a pull request, and for changes to fit the [design tokens](docs/STYLE.md). The phone UI and the loading optimizations are shaped around this machine, so whether they belong in upstream is worth asking the author first. Upstream has since moved motion timings and colors into its token table and added a lint rule that fails when copied code exceeds the baseline, so review the maintained implementation after each sync.
+
 ## Preview
 
 The settings page's Theme style row switches between the Claude and DeepSeek palettes, and light/dark follows your system's color mode. In each group the top row is the Studio home page and the bottom row a Markdown conversation, light on the left and dark on the right.
@@ -89,6 +109,9 @@ To enable the Anthropic fonts, choose one of the following:
 ② Skip the install — copy the `.ttf` files into `$DSH_HOME/dsh-claude-style/fonts/`.
 
 ## Installation
+
+The changes in this fork are not on npm: the steps below install the upstream original, without the phone UI and loading optimizations above. For the maintained build, download `dsh-claude-style-maintained-*.tgz` from [Releases](https://github.com/BluedeDove/dsh-claude-style/releases) and run `dsh plugin --profile web add <local tarball path>` (`dsh plugin add` forwards its arguments to pnpm, which accepts a local tarball), disabling `dsh-web-mobile` and `dsh-mobile-flow` first. `dsh plugin --profile web add BluedeDove/dsh-claude-style` does not yield a usable build, because `lib/` is not committed. The steps below apply to the upstream original.
+
 
 1. From the official plugin page, add the plugin below and it installs.
 
