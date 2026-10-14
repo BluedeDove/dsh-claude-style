@@ -45,8 +45,15 @@
         document.body.dispatchEvent(event)
         return event.defaultPrevented
       }
-      await sleep(150)
-      var skinRail = navPhase.querySelector('.dsh-claude-turn-rail')
+      // The rail's chunk is requested after a conversation appears (D39).
+      // Wait for that arrival before measuring its synchronous interactions.
+      var railDeadline = performance.now() + 2000
+      var skinRail = null
+      while (skinRail === null && performance.now() < railDeadline) {
+        skinRail = navPhase.querySelector('.dsh-claude-turn-rail')
+        if (skinRail === null) await sleep(20)
+      }
+      if (skinRail === null) throw new Error('The deferred turn rail did not arrive within two seconds')
       var skinMarks = skinRail === null ? [] : Array.prototype.slice.call(skinRail.querySelectorAll('.dsh-claude-turn-rail-mark'))
       var skinCurrent = skinRail === null ? null : skinRail.querySelector('.dsh-claude-turn-rail-mark[data-current]')
       var navOut = {

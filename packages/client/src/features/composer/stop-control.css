@@ -1,0 +1,8 @@
+body[data-dsh-claude-style] .dsh-claude-stop-control { display: none; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] .dsh-claude-stop-control { position: absolute; right: 12px; top: 18px; width: 40px; height: 40px; min-width: 40px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; padding: 0; color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2); z-index: 40; cursor: pointer; touch-action: manipulation; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] [data-composer-card][data-dsh-claude-stop-overlay] button[data-dsh-claude-control="stop"]:not([data-dsh-claude-stop-owned]) { visibility: hidden; pointer-events: none; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] [data-composer-card][data-dsh-claude-stop-draft] button[data-dsh-claude-stop-owned] { right: 60px; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] [data-composer-card][data-dsh-claude-stop-draft] [data-input-scroll] { padding-right: 112px; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] .dsh-claude-stop-control:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] .dsh-claude-stop-control:disabled { cursor: progress; opacity: 0.55; }
+body[data-dsh-claude-style][data-dsh-claude-composer-active] .dsh-claude-stop-error { position: absolute; right: 12px; top: 64px; max-width: min(360px, 80%); background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); border: 1px solid var(--dsw-alias-border-l2); padding: 6px 10px; border-radius: 8px; z-index: 41; font-size: 12px; }

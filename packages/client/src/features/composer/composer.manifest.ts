@@ -3,13 +3,14 @@ import type { FeatureManifest } from '../../core/feature'
 export default {
   id: 'composer',
   order: 20,
-  contracts: ['chat.scroller', 'composer.dialog-trigger', 'composer.input', 'composer.mobile-stats', 'composer.placeholder', 'composer.seat', 'composer.stack', 'composer.variant', 'shell.phase', 'composer.tools', 'composer.trailing', 'composer.standard', 'composer.dock'],
+  contracts: ['chat.scroller', 'composer.dialog-trigger', 'composer.input', 'composer.scroll', 'composer.mobile-stats', 'composer.placeholder', 'composer.seat', 'composer.stack', 'composer.variant', 'shell.phase', 'composer.tools', 'composer.trailing', 'composer.standard', 'composer.dock'],
   pref: 'composerScope',
   stylesheets: [
     { file: 'card.css', rank: 80, gate: true },
     { file: 'inline.css', rank: 90, gate: true },
     { file: 'inline-bar.css', rank: 100, gate: true },
     { file: 'comfortable.css', rank: 105, gate: true },
+    { file: 'stop-control.css', rank: 106 },
   ],
   cases: ['composer', 'sync-fault'],
   description: {

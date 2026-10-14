@@ -21,7 +21,7 @@ const nativeAttachmentsScenario={
   async assert({page,session,out}) {
     const checks=[]
     await page.setViewportSize({width:1440,height:1000})
-    const field=page.locator('.dsh-claude-native-input:visible')
+    const field=page.locator('.dsh-claude-native-input:visible:not([inert] *)')
     await field.fill('图片说明')
     const png=new PNG({width:120,height:80});png.data.fill(160)
     for(let at=3;at<png.data.length;at+=4)png.data[at]=255
@@ -60,7 +60,7 @@ const nativeAttachmentsScenario={
     await waitForTurn(page)
     await page.waitForFunction(()=>document.querySelectorAll('[data-chat-flow-kind="turn-tail"]').length>=2)
     const file=path.join(out,'attachment-check.txt');fs.writeFileSync(file,'file attachment layout test\n')
-    const owner=page.locator('[data-composer-card]').filter({has:page.locator('.dsh-claude-native-input:visible')})
+    const owner=page.locator('[data-composer-card]:not([inert] *)').filter({has:page.locator('.dsh-claude-native-input:visible:not([inert] *)')})
     await owner.locator('input[type="file"]').setInputFiles(file)
     await page.waitForSelector('[data-composer-card][data-has-attachments="true"]')
     await sendPrompt(page,'发送文件附件检查')
@@ -70,6 +70,7 @@ const nativeAttachmentsScenario={
     await card.waitFor({state:'visible'})
     const box=await card.boundingBox(),text=await card.innerText()
     checks.push(check('发送后的文本文件保留名称和类型大小，使用紧凑文件条',box.height<=44&&text.includes('attachment-check.txt')&&text.includes('TXT')&&await card.locator('img').count()===0,JSON.stringify({box,text})))
+    await page.waitForFunction(()=>document.querySelector('[data-dsh-claude-send-ghost]')===null)
     await sanitizePage(expression=>page.evaluate(expression));await page.screenshot({path:path.join(out,'sent-file-row.png')})
     checks.push(check('控制台没有异常',session.problems.length===0,session.problems.slice(0,3).join(' | ')))
     return checks

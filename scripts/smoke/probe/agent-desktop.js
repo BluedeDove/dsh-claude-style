@@ -150,7 +150,8 @@
       var banEntry = document.querySelector('.dsh-claude-account-inject [data-dsh-claude-ban-row]')
       if (banEntry) {
         banEntry.click()
-        await sleep(80)
+        // The hold screen is loaded on demand; measure after its actual arrival.
+        for (var banWait = 0; banWait < 100 && !document.querySelector('[data-dsh-ban]'); banWait++) await sleep(20)
         r.banOpened = document.querySelectorAll('[data-dsh-ban]').length
         if (hostRow) hostRow.dispatchEvent(new MouseEvent('mouseleave'))
         var coveredMenu = document.querySelector('body > [role="menu"]')

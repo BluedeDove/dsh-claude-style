@@ -26,7 +26,7 @@ const mobileScenario = {
       window.__nativeObserver.observe(field,{attributes:true,childList:true,subtree:true})
       window.__stopSamples=0; window.__stopBlocked=0
       function sample(){
-        const stop=document.querySelector('button[data-dsh-claude-control="stop"]')
+        const stop=[...document.querySelectorAll('button[data-dsh-claude-control="stop"]')].find(element=>!element.closest('[inert]')&&element.checkVisibility())
         if(stop){const r=stop.getBoundingClientRect();if(r.width&&r.height){window.__stopSamples++;const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);if(!stop.contains(hit)){
           window.__stopBlocked++
           if(!window.__stopBlockedBy){const chain=[];for(let p=stop;p&&p!==document.body;p=p.parentElement){const s=getComputedStyle(p);chain.push({cls:p.className,z:s.zIndex,position:s.position,container:s.containerType,transform:s.transform})}window.__stopBlockedBy={hit:hit?.className,box:[r.x,r.y,r.width,r.height],disabled:stop.disabled,chain,nativeLength:document.querySelector('.dsh-claude-native-input')?.value.length,nativeHidden:document.querySelector('.dsh-claude-native-send')?.hidden}}

@@ -10,6 +10,7 @@ import type manifest from './composer.manifest'
 import { closestFrom, setAttributeIfChanged } from '../../shared/dom'
 import { writeScroll } from '../../shared/scroll-owner'
 import { installComfortableComposer } from './comfortable'
+import { installStopControl } from './stop-control'
 
 /** What other features read off the composer's reading (ui.composer). */
 export interface ComposerHandle extends FeatureHandle {
@@ -34,6 +35,7 @@ export interface ComposerHandle extends FeatureHandle {
  */
 export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   const comfortable = installComfortableComposer()
+  const stopControl = installStopControl(ctx)
   /** Whether the page shows the hero composer, as of the last reading. */
   let hero = false
   /** Whether the composer restyle applies to the page shown, as of the last reading. */
@@ -133,9 +135,14 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
     for (const card of cards) {
       const commands = card.querySelector('[class*="_tools"] button[aria-haspopup="listbox"]')
       if (commands !== null) setAttributeIfChanged(commands, CONTROL_ATTR, 'commands')
+      let hasSend = false, hasStop = false
       for (const button of card.querySelectorAll('[class*="_trailing"] button[class*="_primary"]')) {
-        setAttributeIfChanged(button, CONTROL_ATTR, button.querySelector('svg rect') !== null ? 'stop' : 'send')
+        const control = button.querySelector('svg rect') !== null ? 'stop' : 'send'
+        setAttributeIfChanged(button, CONTROL_ATTR, control)
+        if (control === 'stop') hasStop = true
+        else hasSend = true
       }
+      card.toggleAttribute('data-dsh-claude-dual-actions', hasSend && hasStop)
     }
     const access = findAccessTrigger()
     if (access !== null) setAttributeIfChanged(access, CONTROL_ATTR, 'access')
@@ -490,12 +497,13 @@ export function install(ctx: HostContext, ui: FeatureUi<typeof manifest>) {
   readState()
 
   return () => {
+    stopControl()
     comfortable.stop()
     active = false
     heroCard = null
     document.body.removeAttribute(COMPOSER_ATTR)
     document.body.removeAttribute(COMPOSER_HIDDEN_ATTR)
-    const marks = ['data-composer-variant', 'data-has-attachments', ATTACHMENT_TILE_ATTR, DRAFT_EMPTY_ATTR, CONTROL_ATTR, 'data-dsh-claude-context-meter']
+    const marks = ['data-composer-variant', 'data-has-attachments', ATTACHMENT_TILE_ATTR, DRAFT_EMPTY_ATTR, CONTROL_ATTR, 'data-dsh-claude-context-meter', 'data-dsh-claude-dual-actions']
     for (const mark of marks) {
       for (const marked of document.querySelectorAll(`[${mark}]`)) marked.removeAttribute(mark)
     }

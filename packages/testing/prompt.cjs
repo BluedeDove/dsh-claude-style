@@ -19,7 +19,7 @@ const HOST = {
 /** Type a prompt into the composer and send it, the way a reader does. */
 async function sendPrompt(page, text) {
   await page.waitForSelector(HOST.composer, { state: 'attached', timeout: 60000 })
-  const native = page.locator('.dsh-claude-native-input:visible')
+  const native = page.locator('.dsh-claude-native-input:visible:not([inert] *)')
   if (await native.count()) {
     await native.fill(text)
     await page.getByRole('button', {name: '发送消息', exact: true}).click()
@@ -71,8 +71,9 @@ async function composed(page, text, timeoutMs = 3000) {
 }
 
 /** Wait until the turn has settled: its tail row is there and nothing streams. */
-async function waitForTurn(page, timeoutMs = 90000) {
-  await page.waitForSelector(HOST.turnTail, { timeout: timeoutMs })
+async function waitForTurn(page, timeoutMs = 90000, tailState = 'visible') {
+  // A turn cancelled before its answer has a closed but empty, hidden tail.
+  await page.waitForSelector(HOST.turnTail, { timeout: timeoutMs, state: tailState })
   await page.waitForFunction((selector) => document.querySelectorAll(selector).length === 0, HOST.streaming, { timeout: timeoutMs })
 }
 

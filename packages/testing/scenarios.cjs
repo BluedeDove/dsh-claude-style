@@ -28,6 +28,7 @@ const { sanitizePage } = require('../../scripts/shared/privacy.cjs')
 const { mobileScenario } = require('./mobile.cjs')
 const { contentLayoutScenario } = require('./content-layout.cjs')
 const { nativeAttachmentsScenario } = require('./native-attachments.cjs')
+const { stopControlScenarios } = require('./stop-controls.cjs')
 
 /**
  * How far behind the tail the scroller may lag while the reader follows it. The
@@ -71,6 +72,7 @@ async function captureBothSchemes(context) {
 
 /** The scenarios: each boots its own instance, sends its prompt, and asserts. */
 const SCENARIOS = {
+  ...stopControlScenarios,
   contentLayout:contentLayoutScenario,
   nativeAttachments:nativeAttachmentsScenario,
   /** A scripted answer: the reader's message, the thought, the markdown. */

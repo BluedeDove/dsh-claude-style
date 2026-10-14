@@ -87,7 +87,8 @@
       var press = { pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, clientX: hitBox.left + 6, clientY: hitBox.top + hitBox.height / 2, bubbles: true }
       hit.dispatchEvent(new PointerEvent('pointerdown', Object.assign({ buttons: 1 }, press)))
       hit.dispatchEvent(new PointerEvent('pointerup', Object.assign({ buttons: 0 }, press)))
-      await sleep(250)
+      // The one-shot sheet is fetched and decoded on the first poke.
+      for (var pokeWait = 0; pokeWait < 100 && whaleNow().animation !== 'poke-left'; pokeWait++) await sleep(20)
       r.states.poke = whaleNow()
       if (mascotName === 'deepy') {
         // Two sheets are all this case asks for: the one it plays above, and the

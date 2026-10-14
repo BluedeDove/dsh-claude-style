@@ -22,6 +22,7 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 
 - 历史懒渲染保留宿主折叠语义：收起后隐藏思考、工具和中间说明，最终答案继续可见，展开及浏览器查找保持可用。工作室首页卡片、对话图片、Mermaid、SVG 和生成式组件居中，正文保持原有阅读方向。
 - 修复粘贴图片和插入引用后原生输入框仍停在旧位置、草稿不同步的问题；组合输入期间保持字段稳定。消息中的非图片附件改为紧凑文件条，保留名称、类型和大小，图片缩略图保持原有行为。
+- 修复桌面暂停按钮落到圆环下面及发送、暂停相互遮挡的问题。主按钮定位到输入卡片；生成时编辑草稿仍可单独点击暂停，原生输入和手机界面保持独立点击区域，并验证真实任务取消与草稿保留。
 
 <h3 id="en-unreleased">New Features</h3>
 
@@ -39,6 +40,7 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 
 - Lazy history rendering preserves native folds: thoughts, tools and intermediate notes stay hidden while the final answer remains visible; reopening and browser find continue to work. Centre the studio dashboard, conversation images, Mermaid, SVG and generated components while preserving prose alignment.
 - Fix native-input positioning and draft synchronization after pasted images and inserted quotes while preserving composition stability. Show sent non-image attachments as compact file rows with their name, type and size; preserve image thumbnails.
+- Fix desktop stop controls landing underneath the context ring and overlapping Send. Anchor primary controls to the input card, keep Stop separately clickable while editing a running conversation, and preserve independent hit areas in native input and on phones. Verify actual cancellation and retained drafts.
 
 ## [0.13.2] - 2026-10-11
 

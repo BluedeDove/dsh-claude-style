@@ -15,7 +15,9 @@
     // then watches for a pass, which is the idle check, and the quick tier
     // leaves that check out.
     var quietSince = window.__passes
-    for (var waited = 0, quiet = 0; waited < 30 && quiet < 6; waited += 1) {
+    // Deferred scripts and decoded sprite sheets can arrive after the first
+    // quiet frames. Require a full quiet second before the separate idle window.
+    for (var waited = 0, quiet = 0; waited < 100 && quiet < 20; waited += 1) {
       await sleep(50)
       if (window.__passes === quietSince) quiet += 1
       else { quiet = 0; quietSince = window.__passes }

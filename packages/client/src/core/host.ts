@@ -38,6 +38,11 @@ export interface HostFiber {
   dispose(): void
 }
 
+/** A controller-owned session scope, without opening its conversation history. */
+export function sessionScope(ctx: HostContext, id: string | undefined): HostValue {
+  return id === undefined ? undefined : ctx.get('sessions')?.scope?.(id)
+}
+
 /**
  * The host's access-mode trigger: the button its permission slot renders.
  * Every slot render site carries a `[data-slot="<key>"]` wrapper (D19), and

@@ -192,8 +192,7 @@ async function runScenario(name, options) {
       step('waiting for the turn to settle')
       // A scenario that acts while the turn runs, beside the wait rather than after it.
       const during = scenario.duringTurn === undefined ? null : scenario.duringTurn(context)
-      await waitForTurn(page)
-      if (during !== null) await during
+      await Promise.all([waitForTurn(page, 90000, scenario.turnTailState ?? 'visible'), during])
       context.trace = await page.evaluate(() => window.__e2eTrace ?? [])
       if (scenario.afterTurn !== undefined) {
         step('after the turn')

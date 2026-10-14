@@ -2,6 +2,7 @@ import React from 'react'
 import { flushSync } from 'react-dom'
 import { COMPOSER_CARD_SELECTOR, COMPOSER_INPUT_SELECTOR, COMPOSER_SCROLL_SELECTOR } from '@dsh-claude-style/contracts/dom'
 import type { HostContext, HostValue } from '../../core/host'
+import { sessionScope } from '../../core/host'
 
 interface InputSnapshot {phase: string, draft: string, attachmentIds?: string[]}
 interface InputProps {
@@ -43,11 +44,11 @@ function createComposer(ctx: HostContext, updates: Set<() => void>) {
     const pending = React.useRef<string | null>(null), composing = React.useRef(false)
     const current = React.useRef(input); current.current = input
     const face = React.useMemo(() => {
-      const scope = props.sessionId ? ctx.get('sessions')?.scope(props.sessionId) : undefined
+      const scope = sessionScope(ctx, props.sessionId)
       return scope?.get('conversation')?.input?.for(scope)
     }, [props.sessionId]) as HostValue
     const uploads = React.useMemo(() => {
-      const scope = props.sessionId ? ctx.get('sessions')?.scope(props.sessionId) : undefined
+      const scope = sessionScope(ctx, props.sessionId)
       return scope?.get('conversation')?.fileUploads
     }, [props.sessionId]) as HostValue
     React.useEffect(() => {
@@ -65,6 +66,11 @@ function createComposer(ctx: HostContext, updates: Set<() => void>) {
       props.inputActions.setDraft(value)
     }
     function card() {return wrap.current?.closest<HTMLElement>(COMPOSER_CARD_SELECTOR) ?? null}
+    React.useLayoutEffect(() => {
+      const owner = card()
+      owner?.toggleAttribute('data-dsh-claude-native-typing', active && hasStop && !empty)
+      return () => owner?.removeAttribute('data-dsh-claude-native-typing')
+    }, [active, hasStop, empty, props.sessionId])
     React.useEffect(() => {
       let bound: HTMLElement | null = null
       const observer = new MutationObserver(update)
@@ -74,6 +80,7 @@ function createComposer(ctx: HostContext, updates: Set<() => void>) {
         if (!owner) return
         if (owner !== bound) {
           bound?.removeAttribute('data-dsh-claude-native-input')
+          bound?.removeAttribute('data-dsh-claude-native-typing')
           observer.disconnect(); resize.disconnect(); bound = owner
           observer.observe(owner, {attributes: true, subtree: true, childList: true, attributeFilter: ['contenteditable','data-phase','role','data-dsh-claude-control']})
           resize.observe(owner)
@@ -85,9 +92,10 @@ function createComposer(ctx: HostContext, updates: Set<() => void>) {
         setReady(editor?.getAttribute('contenteditable') === 'true' && owner.getAttribute('role') !== 'button')
         setHasStop(!!owner.querySelector('button[data-dsh-claude-control="stop"]'))
         if (active && !owner.hasAttribute('data-dsh-claude-native-input')) owner.setAttribute('data-dsh-claude-native-input', '')
+        owner.toggleAttribute('data-dsh-claude-native-typing', active && !!area.current?.value.trim() && !!owner.querySelector('button[data-dsh-claude-control="stop"]'))
       }
       updates.add(update); update()
-      return () => {updates.delete(update); observer.disconnect(); resize.disconnect(); bound?.removeAttribute('data-dsh-claude-native-input')}
+      return () => {updates.delete(update); observer.disconnect(); resize.disconnect(); bound?.removeAttribute('data-dsh-claude-native-input'); bound?.removeAttribute('data-dsh-claude-native-typing')}
     }, [props.sessionId, input.phase, active])
     function measure() {
       const field = area.current, holder = wrap.current, scroll = card()?.querySelector<HTMLElement>(COMPOSER_SCROLL_SELECTOR)
