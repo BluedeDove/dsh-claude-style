@@ -16,9 +16,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Locate browser
+      - name: Configure CI browser
+        shell: bash
         run: |
-          node -e 'const fs=require("node:fs"); const {chromium}=require("playwright"); fs.appendFileSync(process.env.GITHUB_ENV,"CHROME_PATH="+chromium.executablePath()+"\n")'
+          mkdir -p .debug
+          task_browser_path="$(node -p "require('playwright').chromium.executablePath()")"
+          printf '#!/bin/bash\nexec %q --no-sandbox "$@"\n' "$task_browser_path" > .debug/ci-chrome
+          chmod +x .debug/ci-chrome
+          printf 'CHROME_PATH=%s/.debug/ci-chrome\n' "$PWD" >> "$GITHUB_ENV"
       - run: npm run lint
       - run: npm run features:check
       - run: npm run docs:check
