@@ -4,6 +4,8 @@
 
 What each feature does is in [Features](FEATURES.en.md).
 
+Reminders on the General tab are saved in this browser and remain editable through remote access. Task completion, requests for input and title badges are enabled by default; sound and system notifications are optional. Visible conversations and background subagents remain quiet. Click Allow system notifications, then Test reminder. Phone system notifications require HTTPS and permission; title and sound work over HTTP. Disabling reminders removes status subscriptions. Reloading does not replay old alerts; a closed or suspended page does not receive new task state.
+
 The settings page appears both in the settings dialog (the "Claude Style" tab) and on the plugin page, in five tabs:
 
 | Tab | Settings |

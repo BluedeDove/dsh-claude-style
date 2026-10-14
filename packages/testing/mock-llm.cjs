@@ -49,6 +49,15 @@ const LONG_PIECES = []
 for (let at = 0; at < LONG_LINES.length; at += 5) LONG_PIECES.push(LONG_LINES.slice(at, at + 5).join(''))
 
 const SCRIPTS = {
+  imageFlow: {
+    conversation:[{text:[
+      '# 内容布局检查\n\n正文保持正常阅读方向。\n\n',
+      '![居中图片][wide]\n\n## 图片后的标题\n\n- 文件交付位置\n- 第二个交付位置\n\n',
+      '> 引用中的图片\n>\n> ![引用图片](./tall.png)\n>\n> 图片后的引用正文\n\n',
+      '[![链接图片](./alignment.png)](./alignment.png)\n\n链接图片后的正文。\n\n',
+      '| 项目 | 状态 |\n| --- | --- |\n| 图片 | 正常 |\n\n[wide]: ./alignment.png "宽图"\n',
+    ]}],auxiliary:{text:['图片引用检查']},
+  },
   visuals: {
     conversation: [{text: ['# 内容布局检查\n\n正文保持正常阅读方向。\n\n',
       '![居中图片](./alignment.png)\n\n',

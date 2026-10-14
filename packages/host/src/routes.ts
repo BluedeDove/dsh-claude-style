@@ -11,7 +11,7 @@
  * The paths are the shared contract (`@dsh-claude-style/contracts/routes`,
  * D46): the browser half addresses the same names.
  */
-import { HDSL_PATH, HDSL_SKIN_PATH, PEAKRATE_PATH, ROUTE_PREFIX, SESSION_DELETE_PATH, SESSION_SEARCH_PATH, USAGE_PATH, USERNAME_PATH } from '@dsh-claude-style/contracts/routes'
+import { HDSL_PATH, HDSL_SKIN_PATH, NOTIFICATION_WORKER_PATH, PEAKRATE_PATH, ROUTE_PREFIX, SESSION_DELETE_PATH, SESSION_SEARCH_PATH, USAGE_PATH, USERNAME_PATH } from '@dsh-claude-style/contracts/routes'
 import { existsSync, readFileSync, readdirSync, realpathSync, rmSync, statSync } from 'node:fs'
 import { userInfo } from 'node:os'
 import { dirname, join, resolve, sep } from 'node:path'
@@ -24,6 +24,7 @@ import { packageRoot } from './package-root.js'
 import { createPeakRate } from './peakrate.js'
 import { QUERY_MAX, createSessionSearch } from './search.js'
 import { createUsage } from './usage.js'
+import { NOTIFICATION_WORKER_SOURCE } from './notification-worker.js'
 
 /** The copy document, built from `packages/client/data/model-descriptions.json` by scripts/build.mjs. */
 const COPY_FILE = 'model-descriptions.json'
@@ -490,6 +491,15 @@ export function registerRoutes(ctx: DshContext, scope: DshScope) {
         }
         res.writeHead(404)
         res.end()
+      },
+    })
+
+    register('notification worker', {
+      kind: 'exact', path: NOTIFICATION_WORKER_PATH,
+      handler: (req: DshRequest, res: DshResponse) => {
+        if (methodRefused(req, res, ['GET', 'HEAD'])) return
+        res.writeHead(200, {'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache'})
+        res.end(req.method === 'HEAD' ? undefined : NOTIFICATION_WORKER_SOURCE)
       },
     })
 

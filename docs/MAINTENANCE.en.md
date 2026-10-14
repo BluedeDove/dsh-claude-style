@@ -1,5 +1,7 @@
 # Maintained version
 
+Reminder channels follow [dsh-notify-me](https://github.com/chromoany/dsh-notify-me). The implementation subscribes to the host's shared live-status source without history projections, repeated current-session scans or polling. Preferences belong to this browser; cross-tab deduplication is bounded. Its worker handles notification clicks without caching or fetch interception, focusing an existing DSH page and opening the corresponding session.
+
 This fork derives from [Nwflower/dsh-claude-style](https://github.com/Nwflower/dsh-claude-style). `master` retains upstream code; `maintained` owns local features, loading optimizations and the phone UI. The source baseline is `c97673a`, the upstream 0.13.2 source commit. Upstream version tags point to packaged output.
 
 The skin owns the phone layout and native textarea. Disable `dsh-web-mobile` and `dsh-mobile-flow` when enabling this build. Drafts are committed through the official input slot on submit, blur or page departure; typing and composition keep the textarea DOM stable. Native textareas use the platform caret, and the official editor keeps the configured animated caret. The input switch is under Tools.

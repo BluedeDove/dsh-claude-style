@@ -9,12 +9,14 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 <h3 id="cn-unreleased">新增功能</h3>
 
 - 新增内置手机界面：抽屉侧栏、紧凑顶栏、可展开工具与独立统计区域；原生文本框保留中文组合输入、草稿、命令和附件，启用时关闭两个旧手机插件。
+- 添加按浏览器设置的轻量提醒：任务结束、等待确认、标题、声音和系统通知，支持返回对应对话、可见对话安静及后台子代理过滤。直接监听共享运行状态，不加载历史；系统通知需 HTTPS 与浏览器授权。
 
 ### 体验优化
 
 - 迁入本地加载优化：对话分页与可恢复侧栏范围、按页面刷新、首页可见时统计、正文搜索按需索引、异步目录扫描与缓存；手机模块仅在窄屏或触屏加载。
 - 手机的「更多」和「工具」在浮窗内展开，保持顶栏与输入栏高度，限制在可视屏幕内，点击外侧或关闭按钮即可收起。版本升级保留固定设置入口与原有主题配置。
 - 桌面输入区增加多行空间，设置栏随宽度换行，上下文统计独立显示；原生输入在运行任务且草稿为空时让出发送位置，保持停止按钮可操作。
+- 图片独占的 Markdown 链接和按钮使用自适应高度及正常文档流，保留居中和原生点击行为；检查普通、引用式、引用块及链接图片的完整高度与后续文字排列。
 - 手机阅读仅保留一行顶栏与紧凑输入栏，模型、统计和目标操作收入工具浮窗，有目标时保留提示圆点；对话页隐藏装饰吉祥物，减少浏览器可视区域的常驻占用。
 - 桌面上下文圆环与模型、推理等级同排，取消只放圆环的独立空行；设置栏换行后跟随模型控件，继续支持点击统计详情，手机仍放在工具浮窗内。
 
@@ -27,12 +29,14 @@ All notable changes to `dsh-claude-style` are documented here, newest first.
 <h3 id="en-unreleased">New Features</h3>
 
 - Built-in phone interface adds a drawer sidebar, compact header, expandable tools and separate statistics; native input preserves composition, drafts, commands and attachments. Disable the two previous phone plugins when enabling it.
+- Add device-local reminders for finished tasks and requests for input, with title, sound and system channels, links back to conversations, visible-conversation quiet mode and background subagent filtering. Subscribe to shared live status without loading history. System notifications require HTTPS and permission.
 
 ### Improvements
 
 - Local loading changes add bounded conversation pages, reversible sidebar ranges, page-specific refreshes, visible dashboard polling, demand-driven text indexing, asynchronous log discovery and caches. Phone code loads only on narrow or touch screens.
 - Phone conversation actions and input tools open in floating windows within the visual viewport, preserving header and composer height. Dismiss outside or with the close button. Upgrades retain the stable settings namespace and existing theme preferences.
 - Desktop composers provide multiline space, a wrapping settings toolbar and a separate context statistics row. Native input yields the send position to the stop button while a task runs with an empty draft.
+- Give image-only Markdown links and buttons automatic height in normal document flow, preserving centering and native interactions. Check ordinary, reference-style, blockquote and linked images for full-height containment and following prose layout.
 - Phone reading keeps a one-row header and compact input bar. Models, statistics and goal actions open in Tools with a dot for a current goal; decorative mascots stay off conversations to reduce persistent viewport usage.
 - Place the desktop context ring beside the model and reasoning controls, removing its separate row. Follow the model controls when the toolbar wraps and preserve the statistics popover; phones keep the ring inside Tools.
 

@@ -96,6 +96,19 @@ body[data-dsh-claude-style] [data-chat-flow] [class*="markdown"] button:has(> im
   max-width: 100%;
   margin-inline: auto;
 }
+/* Image-only links are media containers, with their full image in normal flow. */
+body[data-dsh-claude-style] [data-chat-flow] [class*="markdown"] p > button:has(> img:only-child),
+body[data-dsh-claude-style] [data-chat-flow] [class*="markdown"] p > a:has(> img:only-child) {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
+  line-height: 0;
+  position: static;
+  float: none;
+  margin-inline: auto;
+}
 /* Conversation prose — body and headings alike — takes the serif face and lets
    Chinese fall through to a sans CJK; the display rule above stays for headlines. */
 body[data-dsh-claude-style] [class*="markdown"] {

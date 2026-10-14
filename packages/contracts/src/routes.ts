@@ -7,6 +7,10 @@
 /** Route prefix this plugin owns. */
 export const ROUTE_PREFIX = '/dsh-claude-style'
 
+/** Notification-only worker and its isolated scope; neither intercepts host traffic. */
+export const NOTIFICATION_WORKER_PATH = `${ROUTE_PREFIX}/notification-worker.js`
+export const NOTIFICATION_SCOPE = `${ROUTE_PREFIX}/notifications/`
+
 /** One-shot host OS user route; the browser half caches the response and never polls. */
 export const USERNAME_PATH = `${ROUTE_PREFIX}/username`
 

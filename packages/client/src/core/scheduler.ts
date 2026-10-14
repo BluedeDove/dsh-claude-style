@@ -80,6 +80,7 @@ export interface Handles {
   headerBand: FeatureHandle
   settingsNav: FeatureHandle
   history: FeatureHandle
+  notifications: FeatureHandle
   mobile: FeatureHandle
 }
 

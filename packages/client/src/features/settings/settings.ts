@@ -10,6 +10,7 @@ import { createSettingsComposerTab } from './settings-tab-composer'
 import { createSettingsConversationTab } from './settings-tab-conversation'
 import { createSettingsGeneralTab } from './settings-tab-general'
 import { createSettingsSidebarTab } from './settings-tab-sidebar'
+import { NotificationSettings } from './notification-settings'
 import type { Prefs } from '../../constants'
 import type { SettingsTabId } from '../../core/feature'
 import type { HostContext } from '../../core/host'
@@ -247,6 +248,7 @@ export function ClaudeStyleSettingsSection(props: { embed?: boolean }) {
     readOnly ? React.createElement('div', { className: 'dsh-claude-settings-notice', role: 'note' }, settingsCopy('remoteReadOnly', 'This page reaches DSH through a remote address, and DSH saves settings only from a page opened at a local address such as localhost. The values shown are the ones DSH holds; change them on the computer running DSH.')) : null,
     React.createElement(ClaudeStyleSettingsTabStrip, { active: activeTab, onPick: setActiveTab }),
     React.createElement('fieldset', { className: 'dsh-claude-settings-rows', role: 'tabpanel', key: tab.id, disabled: readOnly }, tabRows(tab, view)),
+    activeTab === 'general' ? React.createElement(NotificationSettings) : null,
     error === null ? null : React.createElement('div', { className: 'dsh-claude-settings-error' }, error),
   )
 }

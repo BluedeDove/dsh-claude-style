@@ -325,7 +325,7 @@ interface HostCommandResult {
 
 /** The shell's `uiSession`: which session is selected, and how it is doing. */
 export interface HostUiSessionService {
-  current?: { value?: { key?: unknown } }
+  current?: { value?: { key?: unknown }, subscribe?(listener: () => void): () => void }
   sessionStatus?: HostSnapshotSource<HostSessionStatusSnapshot>
 }
 
